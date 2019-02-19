@@ -3,6 +3,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <stdint.h>
 
 
 
@@ -83,6 +84,7 @@ Packet* client_receive_packet(Packet* packet, int fd){
     if (ret == -1 && errno != EINTR) perror("Error reading");
     if (ret == -1 && errno == EINTR) goto A;
 
+    //printf("received: %x\t", buf[0]);
     if(buf[0] != 0xaa) goto A;
     //printf("received[0]: %x\n", buf[0]);
 
@@ -175,7 +177,7 @@ void client_print_packet(Packet* packet){
             break;
 
         case STATUS:
-            printf("StatusPacket %d : distance %f, angle %d\n", packet->type, ((StatusPacket*)packet)->distance, ((StatusPacket*)packet)->angle);
+            printf("StatusPacket %d : distance %d, angle %d\n", packet->type, ((StatusPacket*)packet)->distance, ((StatusPacket*)packet)->angle);
             break;
 
         case ERROR:
@@ -183,6 +185,7 @@ void client_print_packet(Packet* packet){
             break;
 
         default:
+            printf("PacketCode Unknown\n");
             break;
     }
 }
