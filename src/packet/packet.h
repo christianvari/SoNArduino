@@ -1,3 +1,4 @@
+#include <stdint.h>
 
 //types
 #define COMMAND 0
@@ -11,23 +12,23 @@
 
 
 typedef struct{
-    int type;
+    uint8_t type;
 }Packet;
 
 typedef struct {
     Packet packet;
-    int command;
+    uint8_t command;
 }CommandPacket;
 
 typedef struct{
     Packet packet;
-    float distance;
-    int angle;
+    uint8_t angle;
+    uint8_t distance;
 }StatusPacket;
 
 typedef struct{
     Packet packet;
-    int error_code;
+    uint8_t error_code;
 }ErrorPacket;
 
 enum Error_Code{
