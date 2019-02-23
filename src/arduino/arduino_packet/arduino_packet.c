@@ -2,11 +2,8 @@
 #include "uart.h"
 #include "arduino_packet.h"
 #include <stdlib.h>
+#include <stdio.h>
 
-
-uint8_t calcute_checksum(uint8_t *buf, int n){
-    return 0;
-}
 
 
 int arduino_send_packet(Packet* packet){
@@ -57,7 +54,51 @@ int arduino_send_packet(Packet* packet){
     return n+1;
 }
 
-Packet* arduino_receive_packet(Packet* packet){
+void arduino_receive_packet(CommandPacket* packet){
+ 
+    //printf("In attesa\n");
+    uint8_t buf[30];
+    
+    S:
+    //printf("stato0\n");
+    buf[0]=0;
+    while(buf[0] != 0xaa){
+        buf[0]=UART_getChar();
+        //printf("received byte: %x\n", buf[0]);
+    }
+    //printf("stato1\n");
+    buf[1]=UART_getChar();
+    //printf("received byte: %x\n", buf[1]);
+    if(buf[1]!=0x55){
+        goto S;
+    }
+    //printf("stato2\n");
+    uint8_t n = UART_getChar();
 
-    return NULL;
+    buf[2]= n;
+    //printf("received byte: %x\n", buf[2]);
+    //printf("stato3\n");
+    int i;
+    int j;
+    
+    //printf("waiting for packet byte\n");
+    packet->packet.type = UART_getChar();
+    buf[3] = packet->packet.type;
+    //printf("received byte: %x\n", buf[3]);
+    //printf("stato4\n");
+    
+    
+    //printf("waiting for packet byte\n");
+    packet->command = UART_getChar();
+    buf[4] = packet->command;
+    //printf("received byte: %x\n", buf[4]);
+    //printf("stato5\n");
+    
+
+    uint8_t cs = UART_getChar();
+    //printf("received byte: %x\n", cs);
+    if(calcute_checksum(buf, 5) != cs) goto S;
+
+
+
 }

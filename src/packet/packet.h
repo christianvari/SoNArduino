@@ -35,3 +35,6 @@ enum Error_Code{
   OutRange=0x0,
   UnknownCommand=0x1
 } ;
+
+
+uint8_t calcute_checksum(uint8_t *, int );

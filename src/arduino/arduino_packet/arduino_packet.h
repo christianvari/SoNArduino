@@ -4,5 +4,5 @@
 
 int arduino_send_packet(Packet* );
 
-Packet* arduino_receive_packet(Packet*);
+void arduino_receive_packet(CommandPacket*);
 

@@ -61,3 +61,24 @@ void UART_putString(uint8_t* buf, int n){
     }
 }
 */
+
+/************************/
+//COMMENT THIS TO DISABLE PRINTF
+/************************/
+
+// this function is called by printf as a stream handler
+int usart_putchar_printf(char var, FILE *stream) {
+    // translate \n to \r for br@y++ terminal
+    if (var == '\n') UART_putChar('\r');
+    UART_putChar(var);
+    return 0;
+}
+
+static FILE mystdout = FDEV_SETUP_STREAM(usart_putchar_printf, NULL, _FDEV_SETUP_WRITE);
+
+void printf_init(void){
+  stdout = &mystdout;
+  
+  // fire up the usart
+  UART_init (  );
+}
