@@ -20,6 +20,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <avr/io.h>
+#include <avr/iom2560.h>
+
 
 /*--------  Constants  --------*/
 
@@ -34,6 +36,6 @@
 
 /*--------  Functions  --------*/
 
-void startServo();
+void startServo(void);
 
 
