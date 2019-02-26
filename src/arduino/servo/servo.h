@@ -32,7 +32,7 @@
 /* Definisco la maschera per la porta B per avere il pin 12 in output */
 #define PIN12_MASK (1<<PB6)
 
-/* Fast PWM non invertito */
+/* Fast PWM Mode 14 con TOP su ICR non invertito */
 #define TCCRA_MASK (1<<COM1B1)|(1<<WGM11)
 
 /* Prescaler settato a 64 */
@@ -42,7 +42,7 @@
 
 #define SG90_MAX_ANGLE 620
 #define SG90_MIN_ANGLE 130
-#define SG90_WIDTH 490.0
+#define SG90_WIDTH 490.0    //Ho bisogno che sia decimale per fare calcoli corretti in setAngle
 
 
 /* Definisco TOP della forma d'onda pwm */

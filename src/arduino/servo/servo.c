@@ -7,7 +7,6 @@
  */
 
 #include "servo.h"
-#include "uart.h"
 
 void Wait(void)
 {

@@ -29,10 +29,10 @@ BINS=servo.elf
 
 # put here the additional .o files you want to generate
 # one .c file for each .o should be present
-OBJS=uart.o
+OBJS=
 
 # put here the additional header files needed for compilation
-HEADERS=uart.h
+HEADERS=
 
 # the file below contains the actual rules
 
