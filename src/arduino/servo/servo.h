@@ -36,9 +36,8 @@
 
 /* Definisco periodi PWM per il servo sg90 */
 
-#define POSITION_0 (uint8_t) 3750; /* 15000us(specifica del servomotore)/4us(periodo) */
-#define POSITION_90 (uint8_t) 5000; /* 20000us (specifica del servomotore)/4us(periodo) */
-#define POSITION_N_90 (uint8_t) 2500; /* 10000us (specifica del servomotore)/4us(periodo) */
+#define SG90_MAX_ANGLE (uint8_t) 500 /* 2000us (specifica del servomotore)/4us(periodo) */
+#define SG90_MIN_ANGLE (uint8_t) 150 /* 1000us (specifica del servomotore)/4us(periodo) */
 
 /* Definisco TOP della forma d'onda pwm */
 
