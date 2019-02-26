@@ -8,16 +8,26 @@
 
 #include "servo.h"
 
-void startServo(){ 
+void Wait(void)
+{
+   uint8_t i;
+   for(i=0;i<50;i++)
+   {
+      _delay_loop_2(0);
+      _delay_loop_2(0);
+      _delay_loop_2(0);
+   }
 
-	// we will use timer 1
+}
+
+void initServo(){ 
+
+/* Setto i registri di configurazione del timer 1 */
+
+
 	TCCR1A=TCCRA_MASK;
 	TCCR1B=TCCRB_MASK;
-	/* clear all higher bits of output compare for timer
-	OCR1AH=0;
-	OCR1BH=0;
-	OCR1CH=0;
-	OCR1CL=0;*/
+
 
 /* Setto il pin in output */
 
@@ -25,22 +35,24 @@ void startServo(){
 
 /* Azzero il Timer 1 */
 
-	TCNT1 =0;
+	TCNT1 = 0;
 
-	ICR1=4999;
+/* Setto il TOP della forma d'onda */
 
-	while(1){
-		// we write on the output compare register a value
-		// that will be proportional to the opposite of the
-		// duty_cycle
-		//OCR1CL = 3750;	/* Set servo shaft at 0° position (15000us/4us)*/
-		OCR1BL = 65;	/* Set servo shaft at 0° position (15000us/4us)*/
-		_delay_ms(1500);
-		OCR1BL = 175;	/* Set servo shaft at 90° position (20000us/4us)*/
-		_delay_ms(1500);
-	}
+	ICR1 = TOP;
 }
 
 int main(void){
-    startServo();
+	initServo();
+    while(1){
+
+		OCR1B = POSITION_0;		/* Set servo shaft at 0° position */
+		Wait();
+		OCR1B = POSITION_90;	/* Set servo shaft at 90° position (20000us/4us)*/
+		Wait();
+		OCR1B = POSITION_N_90;	/* Set servo shaft at 90° position (20000us/4us)*/
+		Wait();
+
+		//_delay_ms(1500);
+	}
 }
