@@ -8,7 +8,7 @@
 
 /**
  *
- * Utilizzo il PIN PWM 13 che corrisponde a PB7 e ha il timer OC1A
+ * Utilizzo il PIN PWM 12 che corrisponde a PB6 e usa l'output compare register OC1B
  * L'ATMEGA2650 va a 16Mhz
  *
  */
