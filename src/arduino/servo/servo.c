@@ -7,6 +7,7 @@
  */
 
 #include "servo.h"
+#include "uart.h"
 
 void Wait(void)
 {
@@ -23,7 +24,6 @@ void Wait(void)
 void initServo(){ 
 
 	/* Setto i registri di configurazione del timer 1 */
-
 
 	TCCR1A=TCCRA_MASK;
 	TCCR1B=TCCRB_MASK;
@@ -42,19 +42,23 @@ void initServo(){
 	ICR1 = TOP;
 
 	/* Posiziono il servo nello stato di partenza */
-	OCR1B = 0;
+	OCR1BH = 0;
+	OCR1BL = 0;
 	OCR1B = SG90_MIN_ANGLE;
 }
 
-int main(void){
-	initServo();
-	Wait();
-    while(1){
+uint8_t setAngle(uint8_t angle){
 
-		OCR1B +=25;
-		Wait();
+	if(angle > 180 || angle < 0)
+		return -1;
+	
+	OCR1B =(SG90_WIDTH/180 * angle + SG90_MIN_ANGLE);
 
+	return 0;
 
-		//_delay_ms(1500);
-	}
+}
+
+uint16_t getAngle(){
+
+	return OCR1B;
 }
