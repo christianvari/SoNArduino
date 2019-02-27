@@ -8,18 +8,6 @@
 
 #include "servo.h"
 
-void Wait(void)
-{
-   uint8_t i;
-   for(i=0;i<25;i++)
-   {
-      _delay_loop_2(0);
-      _delay_loop_2(0);
-      _delay_loop_2(0);
-   }
-
-}
-
 void initServo(){ 
 
 	/* Setto i registri di configurazione del timer 1 */
@@ -44,6 +32,7 @@ void initServo(){
 	OCR1BH = 0;
 	OCR1BL = 0;
 	OCR1B = SG90_MIN_ANGLE;
+	_delay_ms(500);
 }
 
 uint8_t setAngle(uint8_t angle){
@@ -51,13 +40,40 @@ uint8_t setAngle(uint8_t angle){
 	if(angle > 180 || angle < 0)
 		return -1;
 	
-	OCR1B =(SG90_WIDTH/180 * angle + SG90_MIN_ANGLE);
+	OCR1B =(SG90_WIDTH/180 * angle + SG90_MIN_ANGLE)+0.5;
 
 	return 0;
 
 }
 
-uint16_t getAngle(){
+uint8_t getAngle(){
 
-	return OCR1B;
+	return 180 / SG90_WIDTH * (OCR1B - SG90_MIN_ANGLE)+0.5; //Faccio prima la divisione per non andare in overflow
+}
+
+uint8_t modifyAngle(uint8_t type, uint8_t delta){
+
+	if(delta < 0 || delta > 180)
+		return -1;
+
+	uint8_t angle = getAngle();
+	switch (type)
+	{
+		case 0:
+			if(angle - delta < 0)
+				return -1;
+			setAngle(angle-delta);
+			break;
+	
+		case 1:
+			if(angle + delta > 180)
+				return -1;
+			setAngle(angle+delta);
+			break;
+	
+		default:
+			return -1;
+	}
+
+	return 0;
 }
