@@ -12,18 +12,14 @@
  * ================================================== */
 
 #pragma once
-#include <stdio.h>
-#include <stdint.h>
-#include <avr/io.h>
-#include <avr/iom2560.h>
 #include <avr/eeprom.h>
 
 /**================================================== *
  * ==========  Defines  ========== *
  * ================================================== */
 
-#define ADDR_VELOCITA 0x00  // Definisce step angolo
-#define ADDR_PRECISIONE 0x01 // Definisco numero di misurazioni per posizione
+#define ADDR_VELOCITA (uint8_t*) 0x00  // Definisce step angolo
+#define ADDR_PRECISIONE (uint8_t*) 0x01 // Definisco numero di misurazioni per posizione
 
 //Valori default
 #define VELOCITA_DEFAULT 1

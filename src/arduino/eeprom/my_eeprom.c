@@ -29,8 +29,6 @@ uint8_t load (uint8_t* tipo){
 
     uint8_t valore = eeprom_read_byte(tipo);
 
-    printf("Lettura %d\n", valore);
-
     if(valore == 255){
         
         if(tipo == ADDR_PRECISIONE) valore = PRECISIONE_DEFAULT;
