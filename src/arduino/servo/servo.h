@@ -2,9 +2,10 @@
  * @author Christian Vari
  * @email vari.christian@gmail.com
  * @create date 2019-02-21 14:29:20
- * @modify date 2019-02-21 14:29:20
+ * @modify date 2019-02-27 10:42:24
  * @desc Library for SG90
  */
+
 
 /**
  *
@@ -44,7 +45,10 @@
 #define SG90_WIDTH 490.0f    //Ho bisogno che sia decimale per fare calcoli corretti in setAngle
 
 /* Definisco TOP della forma d'onda pwm */
-#define TOP 4999; // f_pwm=f_cpu/(prescale(1+top)) => top= (f_cpu / (f_pwm * prescale)) - 1
+#define TOP 4999 // f_pwm=f_cpu/(prescale(1+top)) => top= (f_cpu / (f_pwm * prescale)) - 1
+
+#define AUMENTA_ANGOLO 1
+#define DIMINUISCI_ANGOLO 0
 
 
 
@@ -60,7 +64,7 @@ void initServo(void);
  *
  * Setta l'angolo passato come parametro
  * Ritorna  => 0 se è andato tutto ok
- * Ritorna  => -1 in caso di errore
+ * Ritorna  => 255 in caso di errore
  *
  */
 uint8_t setAngle(uint8_t angle);
@@ -81,7 +85,7 @@ uint8_t getAngle(void);
  *              delta => angolo da aggiungere o sottrarre a quello attuale
  * 
  * Ritorna      => 0 se è andato tutto ok
- * Ritorna      => -1 in caso di errore
+ * Ritorna      => 255 in caso di errore
  */
 uint8_t modifyAngle(uint8_t type, uint8_t delta);
 
