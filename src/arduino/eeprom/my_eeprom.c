@@ -7,7 +7,6 @@
  */
 
 #include "my_eeprom.h"
-#include "../arduino_packet/uart.h"
 
 uint8_t save (uint8_t valore, uint8_t* tipo){
 
