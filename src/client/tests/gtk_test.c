@@ -40,12 +40,22 @@ static void do_drawing(cairo_t *cr, GtkWidget *widget)
   int width, height;
   gtk_window_get_size(GTK_WINDOW(win), &width, &height);
   
-  cairo_set_line_width(cr, 3);  
-  cairo_set_source_rgb(cr, 0.69, 0.19, 0);
+  cairo_set_line_width(cr, 0.5);  
+  cairo_set_source_rgb(cr, 0, 0, 0);
   
   cairo_translate(cr, width/2, height/4*3);
-  cairo_arc(cr, 0, 0, 300, 0, M_PI*2.0);
-  cairo_stroke_preserve(cr);   
+  cairo_rotate (cr, M_PI);
+
+  cairo_move_to (cr, 0, 80);
+  cairo_line_to (cr, 0, 300);
+  cairo_stroke(cr);  
+
+  cairo_arc(cr, 0, 0, 300, 0, M_PI);
+  cairo_stroke(cr);  
+  cairo_arc(cr, 0, 0, 100, 0, M_PI);
+  cairo_stroke(cr);  
+  cairo_arc(cr, 0, 0, 200, 0, M_PI);
+  cairo_stroke(cr);   
 }
 
 static gboolean clicked(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
