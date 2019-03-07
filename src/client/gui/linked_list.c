@@ -61,11 +61,6 @@ int List_reset(ListHead* head){
   return n;
 }
 
-
-ListItem* List_delete(ListHead* head){
-	return NULL;
-}
-
 void List_print(ListHead* head){
 
   ListItem* aux=head->first;

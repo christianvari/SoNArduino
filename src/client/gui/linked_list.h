@@ -26,9 +26,6 @@ ListItem* List_insert(ListHead* head, ListItem* item);
 //deletes all nodes of the list
 int List_reset(ListHead* head);
 
-//delete all list
-ListItem* List_delete(ListHead* head);
-
 void List_print(ListHead* head);
 
 void List_print_reverse(ListHead* head);
