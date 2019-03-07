@@ -20,7 +20,7 @@ int write_buf(int fd, uint8_t* buf, int n){
             if (ret == -1) perror("Error writing");
             bytes_sent += ret;
         }
-        if(i%4==0) sleep(1);
+        //if(i%4==0) sleep(1);
     }
     
     return bytes_sent;
@@ -32,7 +32,7 @@ int client_send_packet(Packet* packet, int fd){
     
     uint8_t buf[52]={0};
     buf[0]=0xaa;
-    buf[1]=0x55;
+    //buf[1]=0x55;
     uint8_t n=0;
 
     int i;
@@ -40,7 +40,7 @@ int client_send_packet(Packet* packet, int fd){
         case COMMAND:
 
             for(i=0; i<sizeof(CommandPacket); i++){
-                buf[i+3] = *(((uint8_t*) packet)+i);
+                buf[i+1] = *(((uint8_t*) packet)+i);
                 n++;
             }
             break;
@@ -51,7 +51,7 @@ int client_send_packet(Packet* packet, int fd){
         case STATUS:
 
             for(i=0; i<sizeof(StatusPacket); i++){
-                buf[i+3] = *(((uint8_t*) packet)+i);
+                buf[i+1] = *(((uint8_t*) packet)+i);
                 n++;
             }
             break;
@@ -61,7 +61,7 @@ int client_send_packet(Packet* packet, int fd){
         case ERROR:
 
             for(i=0; i<sizeof(ErrorPacket); i++){
-                buf[i+3] = *(((uint8_t*) packet)+i);
+                buf[i+1] = *(((uint8_t*) packet)+i);
                 n++;
             }
             break;
@@ -70,15 +70,11 @@ int client_send_packet(Packet* packet, int fd){
             break;
     }
 
-    buf[2] = (uint8_t)n;
-    buf[n+3] = calcute_checksum(buf, n+3);  //header included
+    //buf[2] = (uint8_t)n;
+    buf[n+1] = calcute_checksum(buf, n+1);  //header included
 
-    int id;
-    for(id=0; id<n+3; id++){
-       printf("%x ", buf[id]);
-    }
 
-    int ret = write_buf(fd, buf, n+4);
+    int ret = write_buf(fd, buf, n+2);
     return ret;
 }
 
@@ -92,9 +88,9 @@ Packet* client_receive_packet(Packet* packet, int fd){
     if (ret == -1 && errno != EINTR) perror("Error reading");
     if (ret == -1 && errno == EINTR) goto A;
 
-    printf("%x ", buf[0]);
+    //printf("%x ", buf[0]);
     if(buf[0] != 0xaa) goto A;
-    printf("received[0]: %x\n", buf[0]);
+    //printf("received[0]: %x\n", buf[0]);
 
     B:
     ret = read(fd, buf+1, 1);
@@ -103,7 +99,7 @@ Packet* client_receive_packet(Packet* packet, int fd){
 
     if(buf[1] == 0xaa) goto B;
     if(buf[1] != 0x55) goto A;
-    printf("received[1]: %x\n", buf[1]);
+    //printf("received[1]: %x\n", buf[1]);
 
 
     C:
@@ -111,7 +107,7 @@ Packet* client_receive_packet(Packet* packet, int fd){
     if (ret == -1 && errno != EINTR) perror("Error reading");
     if (ret == -1 && errno == EINTR) goto C;
 
-    printf("received[2]: %x\n", buf[2]);
+    //printf("received[2]: %x\n", buf[2]);
 
     unsigned char count=buf[2];
 
@@ -123,7 +119,7 @@ Packet* client_receive_packet(Packet* packet, int fd){
             if (ret == -1 && errno != EINTR) perror("Error reading");
             if (ret == -1 && errno == EINTR) continue;
         }
-        printf("received[%d]: %x\n", 3+i, buf[3+i]);
+        //printf("received[%d]: %x\n", 3+i, buf[3+i]);
 
     }
 
@@ -132,7 +128,7 @@ Packet* client_receive_packet(Packet* packet, int fd){
     if (ret == -1 && errno != EINTR) perror("Error reading");
     if (ret == -1 && errno == EINTR) goto D;
 
-    printf("received[%d]: %x\n", 3+count ,buf[3+count]);
+    //printf("received[%d]: %x\n", 3+count ,buf[3+count]);
  
     unsigned char cs = calcute_checksum(buf, count+3);
 
@@ -177,7 +173,7 @@ Packet* client_receive_packet(Packet* packet, int fd){
 }
 
 void client_print_packet(Packet* packet){
-    printf("%x %x\n", *((uint8_t*)packet), *(((uint8_t*)packet)+1));
+    
     switch (packet ->type)
     {
         case COMMAND:
