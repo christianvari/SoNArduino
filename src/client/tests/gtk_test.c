@@ -47,9 +47,35 @@ static void do_drawing(cairo_t *cr, GtkWidget *widget)
   cairo_rotate (cr, M_PI);
 
   cairo_move_to (cr, 0, 80);
-  cairo_line_to (cr, 0, 300);
+  cairo_line_to (cr, 0, 400);
   cairo_stroke(cr);  
 
+  cairo_move_to (cr, 80*cos(M_PI/3), 80*sin(M_PI/3));
+  cairo_line_to (cr, 400*cos(M_PI/3), 400*sin(M_PI/3));
+  cairo_stroke(cr);
+
+  cairo_move_to (cr, 80*cos(M_PI/6), 80*sin(M_PI/6));
+  cairo_line_to (cr, 400*cos(M_PI/6), 400*sin(M_PI/6));
+  cairo_stroke(cr);
+
+  cairo_move_to (cr, 80*cos(M_PI/6*4), 80*sin(M_PI/6*4));
+  cairo_line_to (cr, 400*cos(M_PI/6*4), 400*sin(M_PI/6*4));
+  cairo_stroke(cr);
+
+  cairo_move_to (cr, 80*cos(M_PI/6*5), 80*sin(M_PI/6*5));
+  cairo_line_to (cr, 400*cos(M_PI/6*5), 400*sin(M_PI/6*5));
+  cairo_stroke(cr);
+
+  cairo_move_to (cr, 80*cos(0), 80*sin(0));
+  cairo_line_to (cr, 400*cos(0), 400*sin(0));
+  cairo_stroke(cr);
+
+  cairo_move_to (cr, 80*cos(M_PI), 80*sin(M_PI));
+  cairo_line_to (cr, 400*cos(M_PI), 400*sin(M_PI));
+  cairo_stroke(cr);
+
+  cairo_arc(cr, 0, 0, 400, 0, M_PI);
+  cairo_stroke(cr);  
   cairo_arc(cr, 0, 0, 300, 0, M_PI);
   cairo_stroke(cr);  
   cairo_arc(cr, 0, 0, 100, 0, M_PI);
@@ -96,7 +122,7 @@ int main(int argc, char *argv[])
   //g_signal_connect(window, "button-press-event", G_CALLBACK(clicked), NULL);
  
   gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
-  gtk_window_set_default_size(GTK_WINDOW(window), 800, 600); 
+  gtk_window_set_default_size(GTK_WINDOW(window), 900, 600); 
   gtk_window_set_title(GTK_WINDOW(window), "Lines");
 
   gtk_widget_show_all(window);
