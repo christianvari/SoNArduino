@@ -29,11 +29,10 @@ BINS=sonar.elf
 
 # put here the additional .o files you want to generate
 # one .c file for each .o should be present
-OBJS=../arduino_packet/uart.o
+OBJS=
 
 # put here the additional header files needed for compilation
-HEADERS=../arduino_packet/uart.h
-
+HEADERS=
 
 # the file below contains the actual rules
 

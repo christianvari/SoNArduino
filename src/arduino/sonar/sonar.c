@@ -2,16 +2,16 @@
  * @author Christian Vari
  * @email vari.christian@gmail.com
  * @create date 2019-03-05 18:01:31
- * @modify date 2019-03-05 18:01:31
+ * @modify date 2019-03-07 11:23:45
  * @desc Sonar Library
  */
  
 #include "sonar.h"
-#include "../arduino_packet/uart.h"
  
 volatile uint32_t overFlowCounter = 0;
  
 void init_sonar(){
+    sei();
     TRIG_DDR |= (1<<TRIG_BIT);     // Set Trigger pin as output
     ECHO_DDR &= ~(1<<ECHO_BIT);      // Set Echo pin as input
 }
@@ -39,7 +39,6 @@ ISR(TIMER3_OVF_vect){       // Timer1 overflow interrupt
 uint16_t read_sonar(){
     uint16_t dist_in_cm = 0;
     uint32_t trig_counter = 0;
-    init_sonar();                       
     trigger_sonar();                    
 
     while(!(ECHO_PIN & (1<<ECHO_BIT))){     // Aspetto che il pin di echo venga alzato
@@ -53,7 +52,6 @@ uint16_t read_sonar(){
     TCCR3B |= (1<<CS30);                // avvio il timer senza prescaler
     TIMSK3 |= (1<<TOIE3);               // attivo l'interrupt overflow sul timer 3
     overFlowCounter=0;                  // resetto il contatore di overflow
-    sei();                              // attivo gli interrupt
  
     while((ECHO_PIN & (1<<ECHO_BIT))){    // Aspetto che il pin venga abbassato
         if (((overFlowCounter*TIMER_MAX)+TCNT3) > SONAR_TIMEOUT){
@@ -62,17 +60,6 @@ uint16_t read_sonar(){
     };
  
     TCCR3B = 0x00;                      // fermo il timer
-    cli();                              // disabilito gli interrupt
     dist_in_cm = (((overFlowCounter*TIMER_MAX)+TCNT3)/(TO_CM*ISTRUZIONI_US));   // distance in cm
-    return (dist_in_cm );
-}
-
-int main(void){
-
-  printf_init();
-  while(1){
-        printf("distanza %d\n",read_sonar());
-        _delay_ms(1000);
-  }
-  
+    return (dist_in_cm);
 }

@@ -2,7 +2,7 @@
  * @author Christian Vari
  * @email vari.christian@gmail.com
  * @create date 2019-03-05 18:01:31
- * @modify date 2019-03-05 18:01:31
+ * @modify date 2019-03-07 11:23:35
  * @desc Sonar Library
  */
 
@@ -44,14 +44,23 @@
 
 #define SONAR_TIMEOUT ((F_CPU*MAX_SONAR_RANGE)/VELOCITA_SUONO) //Tempo massimo attesa echo
 
-#define TO_CM ((10000*2)/VELOCITA_SUONO)    // 58
+#define TO_CM 58              //((10000*2)/VELOCITA_SUONO)
+
+/**
+ *
+ * Inizializza i pin del sonar e abilita gli interrupt globali
+ *
+ */
+
+void init_sonar(void);
 
 /**
  *
  * Calcola la distanza rilevata
+ * Presuppone che sia stata eseguita prima init_sonar()
  * Ritorna  => distanza se tutto ok
  * Ritorna  => TRIG_ERROR se c'è errore nel trigger
  * Ritorna  => ECHO_ERROR se c'è errore nell'echo
  *
  */
-uint16_t read_sonar();
+uint16_t read_sonar(void);
