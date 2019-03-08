@@ -34,8 +34,10 @@ typedef struct{
 }ErrorPacket;
 
 enum Error_Code{
-  OutRange=0x0,
-  UnknownCommand=0x1
+    CantHandleCommand = 0x0,
+    SetOutOfRange = 0x1,
+    TriggerError = 0x2
+
 } ;
 
 

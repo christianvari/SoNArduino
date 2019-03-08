@@ -36,7 +36,7 @@
  *
  * Scrive valore nella locazione designata da tipo (che può essere ADDR_VELOCITY o ADDR_PRECISION)
  * Ritorna  => 0 se è andato tutto ok
- * Ritorna  => 255 in caso di errore
+ * Ritorna  => 1 in caso di errore
  *
  */
 
@@ -46,7 +46,7 @@ uint8_t save (uint8_t valore, uint8_t* tipo);
  *
  * legge valore nella locazione designata da tipo (che può essere ADDR_VELOCITY o ADDR_PRECISION)
  * Ritorna  => valore se è andato tutto ok
- * Ritorna  => 255 in caso di errore
+ * Ritorna  => 1 in caso di errore
  *
  */
 
