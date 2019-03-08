@@ -14,7 +14,7 @@ void List_set_max_length(ListHead* head, int max_length){
 }
 
 
-ListItem* List_insert(ListHead* head, uint8_t angle, uint8_t distance) {
+ListItem* List_insert(ListHead* head, uint8_t angle, uint16_t distance) {
 
   ListItem *item = malloc(sizeof(ListItem));
   if(!item){perror("Error in malloc"); return NULL;}
