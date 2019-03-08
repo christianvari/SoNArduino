@@ -2,7 +2,17 @@
 #include <gtk/gtk.h>
 #include <stdio.h>
 #include <math.h>
+#include <sys/types.h>
+#include <termios.h>
+#include <string.h>
+#include <errno.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <pthread.h>
 #include "gui/linked_list.h"
+#include "./client_packet/client_packet.h"
 
 /**
 
@@ -13,13 +23,56 @@
 
     Compile:
 
-        gcc main.c gui/linked_list.c -o main `pkg-config --cflags --libs cairo gtk+-3.0` -lm
+        gcc main.c gui/linked_list.c client_packet/client_packet.c ../packet/packet.c -o main `pkg-config --cflags --libs cairo gtk+-3.0` -lm
 
  */
 
 
 #define MAX_RANGE 400
 #define DEFAULT_START 80
+
+int fd;
+
+int serial_set_interface_attribs(int fd, int speed, int parity){
+    struct termios tty;
+    memset(&tty, 0, sizeof(tty));
+    if (tcgetattr(fd, &tty) != 0){
+        perror("Error from tcgetattr");
+        return -1;
+    }
+    switch (speed)
+    {
+        case 9600:
+            speed=B9600;
+            break;
+        case 19200:
+            speed=B19200;
+            break;
+        case 57600:
+            speed=B57600;
+            break;
+        case 115200:
+            speed=B115200;
+            break;
+        default:
+            printf("cannot set baudrate %d\n", speed);
+            return -1;
+    }
+
+    cfsetospeed(&tty, speed);
+    cfsetispeed(&tty, speed);
+    cfmakeraw(&tty);
+
+    tty.c_cflag &= ~(PARENB|PARODD);
+    tty.c_cflag |= parity;
+    tty.c_cflag = (tty.c_cflag & ~CSIZE) | CS8;
+
+    if(tcsetattr(fd, TCSANOW, &tty) != 0){
+        perror("Error from tcsetattr");
+        return -1;
+    }
+    return 0;
+}
 
 static void do_drawing(cairo_t *, GtkWidget*);
 
@@ -31,13 +84,10 @@ struct {
   double line_width;
 } glob;
 
-static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, gpointer user_data)
-{
+static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, gpointer user_data){
   do_drawing(cr, widget);
   return FALSE;
 }
-
-
 
 void draw_line(cairo_t *cr, uint8_t angle, uint8_t distance, double transparence){
 
@@ -107,9 +157,7 @@ void draw_radar_field(cairo_t *cr){
     cairo_stroke(cr);   
 }
 
-
-static void do_drawing(cairo_t *cr, GtkWidget *widget)
-{
+static void do_drawing(cairo_t *cr, GtkWidget *widget){
     GtkWidget *win = gtk_widget_get_toplevel(widget);
 
     int width, height;
@@ -123,13 +171,45 @@ static void do_drawing(cairo_t *cr, GtkWidget *widget)
 
 }
 
-
-
-static gboolean time_handler(GtkWidget *widget)
-{
+static gboolean time_handler(GtkWidget *widget){
   gtk_widget_queue_draw(widget);
   
   return TRUE;
+}
+
+void* reader_work(void* x) {
+
+    uint8_t byte;
+    int bytes_read=0;
+    int ret;
+    Packet *packet;
+    while(1){
+        packet = client_receive_packet(fd);
+        //client_print_packet(packet);
+        if(packet->type==STATUS){
+        //FAI ROBA
+            List_insert(glob.head, ((StatusPacket*)packet)->angle, ((StatusPacket*)packet)->distance);
+        }
+
+
+        free(packet);
+    }
+    pthread_exit(NULL);
+}
+
+int open_serial(){
+    fd = open("/dev/ttyACM0", O_RDWR | O_NOCTTY | O_SYNC);
+    if(fd<0){
+        perror("Error opening serial");
+        return -1;
+    }
+
+    int ret = serial_set_interface_attribs(fd, 19200, 0);
+    if (ret!=0){
+        perror("Error setting serial interface");
+        return -1;
+    }
+    return 0;
 }
 
 int main(int argc, char *argv[])
@@ -139,8 +219,11 @@ int main(int argc, char *argv[])
 
     glob.count = 0;
     glob.head=malloc(sizeof(ListHead));
-    List_init(glob.head, 20);
+    List_init(glob.head, 40);
     glob.line_width = 10;
+
+    
+
 
     gtk_init(&argc, &argv);
 
@@ -161,175 +244,16 @@ int main(int argc, char *argv[])
     //refresh 10 times per sec (100millisec)
     g_timeout_add(100, (GSourceFunc) time_handler, (gpointer) window);
 
+    int ret = open_serial();
+    if(ret){
+        perror("Error in open_serial");
+        exit(EXIT_FAILURE);
+    }
+    pthread_t reader;
+    ret = pthread_create(&reader, NULL, reader_work, NULL);
+    if (ret != 0) { fprintf(stderr, "Error %d in pthread_create\n", ret); exit(EXIT_FAILURE); }
 
-/*--------  START LIST TEST  --------*/
-    ListItem* i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=1;
-    i->distance=1;
-    List_insert(glob.head, i);
-
-    i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=2;
-    i->distance=2;
-    List_insert(glob.head, i);
-
-    i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=3;
-    i->distance=3;
-    List_insert(glob.head, i);
     
-    i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=4;
-    i->distance=4;
-    List_insert(glob.head, i);
-
-    i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=5;
-    i->distance=5;
-    List_insert(glob.head, i);
-
-    i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=6;
-    i->distance=6;
-    List_insert(glob.head, i);
-
-    i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=7;
-    i->distance=1;
-    List_insert(glob.head, i);
-
-    i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=7;
-    i->distance=2;
-    List_insert(glob.head, i);
-
-    i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=8;
-    i->distance=3;
-    List_insert(glob.head, i);
-    
-    i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=9;
-    i->distance=4;
-    List_insert(glob.head, i);
-
-    i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=10;
-    i->distance=5;
-    List_insert(glob.head, i);
-
-    i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=11;
-    i->distance=6;
-    List_insert(glob.head, i);
-
-    i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=12;
-    i->distance=1;
-    List_insert(glob.head, i);
-
-    i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=13;
-    i->distance=2;
-    List_insert(glob.head, i);
-
-    i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=14;
-    i->distance=3;
-    List_insert(glob.head, i);
-    
-    i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=15;
-    i->distance=4;
-    List_insert(glob.head, i);
-
-    i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=16;
-    i->distance=5;
-    List_insert(glob.head, i);
-
-    i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=17;
-    i->distance=6;
-    List_insert(glob.head, i);
-
-    i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=18;
-    i->distance=1;
-    List_insert(glob.head, i);
-
-    i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=19;
-    i->distance=2;
-    List_insert(glob.head, i);
-
-    i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=20;
-    i->distance=3;
-    List_insert(glob.head, i);
-    
-    i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=21;
-    i->distance=4;
-    List_insert(glob.head, i);
-
-    i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=22;
-    i->distance=5;
-    List_insert(glob.head, i);
-
-    i=malloc(sizeof(ListItem));
-    i->next=NULL;
-    i->prev=NULL;
-    i->angle=23;
-    i->distance=6;
-    List_insert(glob.head, i);
     
     //need to free list
 
