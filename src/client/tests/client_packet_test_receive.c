@@ -70,7 +70,7 @@ int main(){
         printf("\nWaiting for a new packet\n");
 
 
-        packet = client_receive_packet(packet, fd);
+        packet = client_receive_packet(fd);
 
         //printf("recived");
         client_print_packet(packet);
