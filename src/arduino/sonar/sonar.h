@@ -62,7 +62,7 @@ void initSonar(void);
  * Ritorna  => SONAR_OUT_OF_RANGE se non c'è segnale di ritorno
  *
  */
-uint16_t readSonar(void);
+uint8_t readSonar(void);
 
 /**
  *
@@ -72,4 +72,4 @@ uint16_t readSonar(void);
  * Ritorna  => SONAR_OUT_OF_RANGE se non c'è segnale di ritorno
  *
  */
-uint16_t getDistance(uint8_t precision);
+uint8_t getDistance(uint8_t precision);
