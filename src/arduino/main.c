@@ -87,6 +87,7 @@ int main(void){
                             arduino_send_packet((Packet*) (&error_packet));
                             break;
                     }
+                    have_to_set_command = 0;
                 }
                 break;
 
@@ -103,6 +104,8 @@ int main(void){
                             arduino_send_packet((Packet*) (&error_packet));
                             break;
                     }
+
+                    have_to_set_command = 0;
                 }
 
                 angle = getAngle();
