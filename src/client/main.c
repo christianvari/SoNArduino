@@ -94,8 +94,10 @@ void draw_line(cairo_t *cr, uint8_t angle, uint8_t distance, double transparence
 
     cairo_set_source_rgba(cr, 1, 0, 0, transparence);
 
-    cairo_move_to (cr, DEFAULT_START*cos(M_PI/180*angle), DEFAULT_START*sin(M_PI/180*angle));
-    cairo_line_to (cr, MAX_RANGE*cos(M_PI/180*angle), MAX_RANGE*sin(M_PI/180*angle));
+    //proportion distance:256=d:MAX_RANGE
+    int d = distance*MAX_RANGE/256;
+    cairo_move_to (cr, -d*cos(M_PI/180*angle), d*sin(M_PI/180*angle));
+    cairo_line_to (cr, -MAX_RANGE*cos(M_PI/180*angle), MAX_RANGE*sin(M_PI/180*angle));
     cairo_stroke(cr);
 
 }
@@ -178,6 +180,15 @@ static void do_drawing(cairo_t *cr, GtkWidget *widget){
 
 }
 
+static void start_handler(GtkWidget *widget, gpointer data){
+    Packet packet;
+    packet.type = COMMAND;
+    CommandPacket commandPacket;
+    commandPacket.command = START;
+    commandPacket.payload = 0;
+    client_send_packet((Packet*)(&commandPacket), fd);
+}
+
 static gboolean time_handler(GtkWidget *widget){
   gtk_widget_queue_draw(widget);
   
@@ -211,7 +222,7 @@ int open_serial(){
         return -1;
     }
 
-    int ret = serial_set_interface_attribs(fd, 19200, 0);
+    int ret = serial_set_interface_attribs(fd, 57600, 0);
     if (ret!=0){
         perror("Error setting serial interface");
         return -1;
@@ -252,6 +263,7 @@ int main(int argc, char *argv[])
     gtk_box_pack_start((GtkBox*)left_box, first_row, TRUE, TRUE, 30);
 
     start_button = gtk_button_new_with_label ("START");
+    g_signal_connect (start_button, "clicked", G_CALLBACK (start_handler), NULL);
     stop_button = gtk_button_new_with_label ("STOP");
     gtk_box_pack_start((GtkBox*)second_row, start_button, TRUE, TRUE, 30);
     gtk_box_pack_start((GtkBox*)second_row, stop_button, TRUE, TRUE, 30);
