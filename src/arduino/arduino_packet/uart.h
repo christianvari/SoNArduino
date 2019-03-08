@@ -18,7 +18,9 @@
 #define HEADER0 0xaa
 #define HEADER1 0x55
 
-void UART_init(uint32_t baud);
-uint8_t UART_da_leggere(void);
+#define BAUD 57600
+#include <util/setbaud.h>
+
+void UART_init(void);
 uint8_t arduino_receive_packet(CommandPacket* packet);
 void arduino_send_packet(Packet* packet);

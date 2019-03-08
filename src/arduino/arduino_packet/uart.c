@@ -8,46 +8,21 @@
 
 #include "uart.h"
 
-
-void setBaud57600(void) {
-#define BAUD 57600
-#include <util/setbaud.h>
-  UBRR0H = UBRRH_VALUE;
-  UBRR0L = UBRRL_VALUE;
-
-#ifdef USE_2X
-  UCSR0A |= (1<<U2X0);
-#endif
-#undef BAUD
-}
-
-void setBaud115200(void) {
-#define BAUD 115200
-#include <util/setbaud.h>
-  UBRR0H = UBRRH_VALUE;
-  UBRR0L = UBRRL_VALUE;
-
-#ifdef USE_2X
-  UCSR0A |= (1<<U2X0);
-#endif
-#undef BAUD
-}
-
-volatile uint8_t da_leggere = 0;
+volatile uint8_t da_leggere;
 volatile uint8_t stato_receive;
 volatile uint8_t stato_to_send;
 volatile uint8_t data_to_send_length;
-uint8_t data_received[4];
+uint8_t data_received[5];
 uint8_t data_to_send[10];
 
 
-void UART_init(uint32_t baud) {
+void UART_init() {
 
-    switch(baud){
-    case 57600: setBaud57600(); break;
-    case 115200: setBaud115200(); break;
-    default: return 0;
-    }
+    //Setto il baudrate a 57600
+    UBRR0H = UBRRH_VALUE;
+    UBRR0L = UBRRL_VALUE;
+    UCSR0A |= (1<<U2X0);
+
 
     stato_receive=0;
     stato_to_send=0;
@@ -61,16 +36,6 @@ void UART_init(uint32_t baud) {
     sei();
 }
 
-uint8_t UART_da_leggere(){
-    
-    if(calcute_checksum(data_received, 3) == data_received[4]){
-        da_leggere = 0;
-        return 1;
-    }
-    
-    da_leggere = 0;
-    return -1;
-}
 
 //ritorna 1 se ha settatto il packet, 0 altrimenti
 uint8_t arduino_receive_packet(CommandPacket* packet){
@@ -78,7 +43,7 @@ uint8_t arduino_receive_packet(CommandPacket* packet){
 
     if (!da_leggere) return 0;
 
-    if(calcute_checksum(data_received, 3) != data_received[4]){
+    if(calculate_checksum(data_received, 3) != data_received[4]){
         da_leggere = 0;
         return 0;
     }
@@ -180,5 +145,5 @@ void arduino_send_packet(Packet* packet){
 
     data_to_send[data_to_send_length] = calculate_checksum(data_to_send, data_to_send_length);
 
-     UCSR0B |= _BV(UDRIE0);
+    UCSR0B |= _BV(UDRIE0);
 }
