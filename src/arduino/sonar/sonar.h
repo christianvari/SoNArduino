@@ -52,15 +52,15 @@
  *
  */
 
-void init_sonar(void);
+void initSonar(void);
 
 /**
  *
  * Calcola la distanza rilevata
- * Presuppone che sia stata eseguita prima init_sonar()
+ * Presuppone che sia stata eseguita prima initSonar()
  * Ritorna  => distanza se tutto ok
  * Ritorna  => TRIG_ERROR se c'è errore nel trigger
  * Ritorna  => ECHO_ERROR se c'è errore nell'echo
  *
  */
-uint16_t read_sonar(void);
+uint16_t readSonar(void);

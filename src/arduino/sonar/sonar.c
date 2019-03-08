@@ -10,7 +10,7 @@
  
 volatile uint32_t overFlowCounter = 0;
  
-void init_sonar(){
+void initSonar(){
     sei();
     TRIG_DDR |= (1<<TRIG_BIT);     // Set Trigger pin as output
     ECHO_DDR &= ~(1<<ECHO_BIT);      // Set Echo pin as input
@@ -36,7 +36,7 @@ ISR(TIMER3_OVF_vect){       // Timer1 overflow interrupt
 }
 
 
-uint16_t read_sonar(){
+uint16_t readSonar(){
     uint16_t dist_in_cm = 0;
     uint32_t trig_counter = 0;
     trigger_sonar();                    
