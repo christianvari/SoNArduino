@@ -102,7 +102,7 @@ ISR(USART0_RX_vect) {
 ISR(USART0_UDRE_vect){
     if (stato_to_send > data_to_send_length){
         stato_to_send = 0;
-        UCSR0B &= ~_BV(UDRIE0);
+        UCSR0B &= ~_BV(UDRIE0);             //Disattiva interrupt per USART0_UDRE
     } else {
         UDR0 = data_to_send[stato_to_send];
         stato_to_send++;
