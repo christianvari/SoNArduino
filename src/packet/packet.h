@@ -37,4 +37,4 @@ enum Error_Code{
 } ;
 
 
-uint8_t calcute_checksum(uint8_t *, int );
+uint8_t calculate_checksum(uint8_t *, int );
