@@ -25,14 +25,14 @@
 # to be uploaded on the avr
 # you can add multiple files, they will be all generated
 
-BINS=sonar_test.elf 
+BINS=arduino_sender_packet.elf 
 
 # put here the additional .o files you want to generate
 # one .c file for each .o should be present
-OBJS=../arduino_packet/arduino_packet.o ../arduino_packet/uart.o ../../packet/packet.o ../sonar/sonar.o
+OBJS=../arduino_packet/uart.o ../../packet/packet.o
 
 # put here the additional header files needed for compilation
-HEADERS=../arduino_packet/arduino_packet.h ../arduino_packet/uart.h ../../packet/packet.h ../sonar/sonar.h
+HEADERS=../arduino_packet/uart.h ../../packet/packet.h
 
 
 # the file below contains the actual rules
