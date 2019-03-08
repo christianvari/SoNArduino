@@ -28,10 +28,11 @@
  */
 
 
-#define MAX_RANGE 400
-#define DEFAULT_START 80
 
 int fd;
+GtkWidget *darea;
+int MAX_RANGE = 400;
+int DEFAULT_START = 80;
 
 int serial_set_interface_attribs(int fd, int speed, int parity){
     struct termios tty;
@@ -161,7 +162,13 @@ static void do_drawing(cairo_t *cr, GtkWidget *widget){
     GtkWidget *win = gtk_widget_get_toplevel(widget);
 
     int width, height;
-    gtk_window_get_size(GTK_WINDOW(win), &width, &height);
+    width = gtk_widget_get_allocated_width(darea);
+    height = gtk_widget_get_allocated_height(darea);
+    //gtk_window_get_size(GTK_WINDOW(win), &width, &height);
+
+    MAX_RANGE=(int)((double)width/9.0*4);
+    if(MAX_RANGE>(double)height/5*3) MAX_RANGE=(int)((double)height/5*3);
+    DEFAULT_START=(int)((double)MAX_RANGE/5.0);
 
     cairo_translate(cr, width/2, height/5*4);
     cairo_rotate (cr, M_PI);
@@ -214,23 +221,58 @@ int open_serial(){
 
 int main(int argc, char *argv[])
 {
-    GtkWidget *window;
-    GtkWidget *darea;
+    GtkWidget *window, *main_box, *left_box, *first_row, *second_row, *third_row, *fourth_row;
+    GtkWidget *start_button, *stop_button, *connect_button, *disconnect_button;
+    GtkWidget *speed_scale, *speed_label;
+    GtkWidget *accuracy_scale, *accuracy_label;
 
     glob.count = 0;
     glob.head=malloc(sizeof(ListHead));
-    List_init(glob.head, 40);
+    List_init(glob.head, 60);
     glob.line_width = 10;
 
     
-
-
     gtk_init(&argc, &argv);
+
 
     window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
+    main_box=gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     darea = gtk_drawing_area_new();
-    gtk_container_add(GTK_CONTAINER(window), darea);
+    left_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
+    first_row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    second_row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    third_row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    fourth_row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+
+    connect_button = gtk_button_new_with_label ("CONNECT");
+    disconnect_button = gtk_button_new_with_label ("DISCONNECT");
+    gtk_box_pack_start((GtkBox*)first_row, connect_button, TRUE, TRUE, 30);
+    gtk_box_pack_start((GtkBox*)first_row, disconnect_button, TRUE, TRUE, 30);
+    gtk_box_pack_start((GtkBox*)left_box, first_row, TRUE, TRUE, 30);
+
+    start_button = gtk_button_new_with_label ("START");
+    stop_button = gtk_button_new_with_label ("STOP");
+    gtk_box_pack_start((GtkBox*)second_row, start_button, TRUE, TRUE, 30);
+    gtk_box_pack_start((GtkBox*)second_row, stop_button, TRUE, TRUE, 30);
+    gtk_box_pack_start((GtkBox*)left_box, second_row, TRUE, TRUE, 30);
+
+    speed_scale = gtk_scale_new_with_range (GTK_ORIENTATION_HORIZONTAL, 1, 10, 1);
+    speed_label = gtk_label_new ("Speed");
+    gtk_box_pack_start((GtkBox*)third_row, speed_scale, TRUE, TRUE, 30);
+    gtk_box_pack_start((GtkBox*)third_row, speed_label, TRUE, TRUE, 30);
+    gtk_box_pack_start((GtkBox*)left_box, third_row, TRUE, TRUE, 30);
+
+    accuracy_scale = gtk_scale_new_with_range (GTK_ORIENTATION_HORIZONTAL, 1, 5, 1);
+    accuracy_label = gtk_label_new ("Accuracy");
+    gtk_box_pack_start((GtkBox*)fourth_row, accuracy_scale, TRUE, TRUE, 30);
+    gtk_box_pack_start((GtkBox*)fourth_row, accuracy_label, TRUE, TRUE, 30);
+    gtk_box_pack_start((GtkBox*)left_box, fourth_row, TRUE, TRUE, 30);
+
+    gtk_box_pack_start((GtkBox*)main_box, darea, TRUE, TRUE, 0);
+    gtk_box_pack_end((GtkBox*)main_box, left_box, TRUE, TRUE, 0);
+    
+    gtk_container_add(GTK_CONTAINER(window), main_box);
 
     gtk_widget_add_events(window, GDK_BUTTON_PRESS_MASK);
 
@@ -238,7 +280,7 @@ int main(int argc, char *argv[])
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);  
 
     gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
-    gtk_window_set_default_size(GTK_WINDOW(window), 900, 600); 
+    gtk_window_set_default_size(GTK_WINDOW(window), 1400, 600); 
     gtk_window_set_title(GTK_WINDOW(window), "Sonar test");
 
     //refresh 10 times per sec (100millisec)
