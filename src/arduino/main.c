@@ -20,7 +20,7 @@ int main(void){
     uint8_t precision = load(ADDR_PRECISION);
     uint8_t direction = AUMENTA_ANGOLO;
     uint8_t angle;
-    uint8_t distance;
+    uint16_t distance;
 
     /**
     

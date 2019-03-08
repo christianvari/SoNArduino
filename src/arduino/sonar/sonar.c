@@ -36,8 +36,8 @@ ISR(TIMER3_OVF_vect){       // Timer1 overflow interrupt
 }
 
 
-uint8_t readSonar(void){
-    uint8_t dist_in_cm = 0;
+uint16_t readSonar(void){
+    uint16_t dist_in_cm = 0;
     uint32_t trig_counter = 0;
     trigger_sonar();                    
 
@@ -64,9 +64,9 @@ uint8_t readSonar(void){
     return (dist_in_cm);
 }
 
-uint8_t getDistance(uint8_t precision){
-    uint8_t distance = ECHO_ERROR;
-    uint8_t tmp;
+uint16_t getDistance(uint8_t precision){
+    uint16_t distance = 0;
+    uint16_t tmp;
     uint8_t reads = 0;
     int i;
     for(i = 0; i< precision; i++){
@@ -78,8 +78,10 @@ uint8_t getDistance(uint8_t precision){
         distance+= tmp;
         reads++;
     }
-    distance=(distance - ECHO_ERROR)/reads;
-
-    return distance;
+    if(reads != 0){
+        distance=(distance)/reads;
+        return distance;
+    }
+    return ECHO_ERROR;
 
 }

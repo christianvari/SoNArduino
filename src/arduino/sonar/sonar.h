@@ -63,7 +63,7 @@ void initSonar(void);
  * Ritorna  => ECHO_ERROR se c'è errore nell'echo
  *
  */
-uint8_t readSonar(void);
+uint16_t readSonar(void);
 
 /**
  *
@@ -74,4 +74,4 @@ uint8_t readSonar(void);
  * Ritorna  => ECHO_ERROR se c'è errore nell'echo
  *
  */
-uint8_t getDistance(uint8_t precision);
+uint16_t getDistance(uint8_t precision);
