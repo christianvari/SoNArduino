@@ -29,17 +29,17 @@ BINS=make.elf
 
 # put here the additional .o files you want to generate
 # one .c file for each .o should be present
-OBJS=../arduino_packet/uart.o ../../packet/packet.o ../sonar/sonar.o ../servo/servo.o ../eeprom/my_eeprom.o
+OBJS=./arduino_packet/uart.o ./../packet/packet.o ./sonar/sonar.o ./servo/servo.o ./eeprom/my_eeprom.o
 
 # put here the additional header files needed for compilation
-HEADERS=../arduino_packet/uart.h ../../packet/packet.h ../sonar/sonar.h ../servo/servo.h ../eeprom/my_eeprom.h
+HEADERS=./arduino_packet/uart.h ./../packet/packet.h ./sonar/sonar.h ./servo/servo.h ./eeprom/my_eeprom.h
 
 
 # the file below contains the actual rules
 
 # !!!!!!!!!!!!!!!! MODIFY HERE !!!!!!!!!!!!!!!! 
 
-include ../avr_common/avr.mk
+include ./avr_common/avr.mk
 
 
 

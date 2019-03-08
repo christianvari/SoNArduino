@@ -1,7 +1,7 @@
-#include "../arduino_packet/uart.h"
-#include "../servo/servo.h"
-#include "../sonar/sonar.h"
-#include "../eeprom/my_eeprom.h"
+#include "arduino_packet/uart.h"
+#include "servo/servo.h"
+#include "sonar/sonar.h"
+#include "eeprom/my_eeprom.h"
 
 #define STATUS_SLEEP 0
 #define STATUS_WORKING 1
