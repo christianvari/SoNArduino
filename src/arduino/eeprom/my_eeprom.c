@@ -11,6 +11,8 @@
 uint8_t save (uint8_t valore, uint8_t* tipo){
 
     if(tipo != ADDR_PRECISION && tipo != ADDR_VELOCITY) return -1;
+    if(tipo == ADDR_PRECISION && valore > MAX_PRECISION) return -1;
+    if(tipo == ADDR_VELOCITY && valore > MAX_VELOCITY) return -1;
 
     eeprom_busy_wait();
 

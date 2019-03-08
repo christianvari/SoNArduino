@@ -24,6 +24,8 @@
 //Valori default
 #define DEFAULT_VELOCITY 1
 #define DEFAULT_PRECISION 1
+#define MAX_VELOCITY 10
+#define MAX_PRECISION 5
 
 
 /**================================================== *
