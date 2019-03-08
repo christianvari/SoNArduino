@@ -20,14 +20,14 @@
 #define TRIG_DDR    DDRD
 #define TRIG_PORT   PORTD
 #define TRIG_PIN    PIND
-#define TRIG_BIT    PD0
+#define TRIG_BIT    PD0             //Primo pin digital CL
 
 /* Echo su scheda */
 
 #define ECHO_DDR    DDRE
 #define ECHO_PORT   PORTE
 #define ECHO_PIN    PINE
-#define ECHO_BIT    PE4
+#define ECHO_BIT    PE4             // Pin digitale 2
 
 #define VELOCITA_SUONO  343         // Velocità del suono a 20 gradi centigradi
 #define MAX_SONAR_RANGE 10          // Massimo range del hc-sr04 in metri
