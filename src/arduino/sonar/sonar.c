@@ -63,3 +63,22 @@ uint16_t readSonar(){
     dist_in_cm = (((overFlowCounter*TIMER_MAX)+TCNT3)/(TO_CM*ISTRUZIONI_US));   // distance in cm
     return (dist_in_cm);
 }
+
+uint16_t getDistance(uint8_t precision){
+    uint16_t distance = ECHO_ERROR;
+    uint16_t tmp;
+    uint8_t reads = 0;
+    int i;
+    for(i = 0; i< precision; i++){
+        tmp = readSonar();
+        if(tmp == TRIG_ERROR)
+            return TRIG_ERROR;
+        else if (tmp == ECHO_ERROR)
+            continue;
+        distance+= tmp;
+        reads++;
+    }
+    distance=(distance - ECHO_ERROR)/reads;
+
+
+}

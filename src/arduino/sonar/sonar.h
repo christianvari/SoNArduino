@@ -64,3 +64,14 @@ void initSonar(void);
  *
  */
 uint16_t readSonar(void);
+
+/**
+ *
+ * Calcola la distanza media rilevata
+ * Presuppone che sia stata eseguita prima initSonar()
+ * Ritorna  => distanza se tutto ok
+ * Ritorna  => TRIG_ERROR se c'è errore nel trigger
+ * Ritorna  => ECHO_ERROR se c'è errore nell'echo
+ *
+ */
+uint16_t getDistance(uint8_t precision);
