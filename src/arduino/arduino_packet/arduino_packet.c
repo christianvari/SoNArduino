@@ -66,38 +66,39 @@ void arduino_receive_packet(CommandPacket* packet){
         buf[0]=UART_getChar();
         //printf("received byte: %x\n", buf[0]);
     }
+    SINC:
     //printf("stato1\n");
     buf[1]=UART_getChar();
     //printf("received byte: %x\n", buf[1]);
-    if(buf[1]!=0x55){
-        goto S;
+    if(buf[1]==0xaa){
+        goto SINC;
+    }else{
+        packet->packet.type = buf[1];
     }
     //printf("stato2\n");
-    uint8_t n = UART_getChar();
+    //uint8_t n = UART_getChar();
 
-    buf[2]= n;
+    //buf[2]= n;
     //printf("received byte: %x\n", buf[2]);
     //printf("stato3\n");
-    int i;
-    int j;
+    
     
     //printf("waiting for packet byte\n");
-    packet->packet.type = UART_getChar();
-    buf[3] = packet->packet.type;
+    
     //printf("received byte: %x\n", buf[3]);
     //printf("stato4\n");
     
     
     //printf("waiting for packet byte\n");
     packet->command = UART_getChar();
-    buf[4] = packet->command;
+    buf[2] = packet->command;
     //printf("received byte: %x\n", buf[4]);
     //printf("stato5\n");
     
 
     uint8_t cs = UART_getChar();
     //printf("received byte: %x\n", cs);
-    if(calcute_checksum(buf, 5) != cs) goto S;
+    if(calcute_checksum(buf, 3) != cs) goto S;
 
 
 

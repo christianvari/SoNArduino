@@ -18,6 +18,8 @@
  */
 
 
+#define MAX_RANGE 400
+#define DEFAULT_START 80
 
 static void do_drawing(cairo_t *, GtkWidget*);
 
@@ -33,6 +35,8 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, gpointer user_data
   return FALSE;
 }
 
+
+
 static void do_drawing(cairo_t *cr, GtkWidget *widget)
 {
   GtkWidget *win = gtk_widget_get_toplevel(widget);
@@ -43,36 +47,54 @@ static void do_drawing(cairo_t *cr, GtkWidget *widget)
   cairo_set_line_width(cr, 0.5);  
   cairo_set_source_rgb(cr, 0, 0, 0);
   
-  cairo_translate(cr, width/2, height/4*3);
+  cairo_translate(cr, width/2, height/5*4);
   cairo_rotate (cr, M_PI);
 
-  cairo_move_to (cr, 0, 80);
-  cairo_line_to (cr, 0, 300);
+  cairo_move_to (cr, 0, DEFAULT_START);
+  cairo_line_to (cr, 0, MAX_RANGE);
   cairo_stroke(cr);  
 
-  cairo_arc(cr, 0, 0, 300, 0, M_PI);
+  cairo_move_to (cr, DEFAULT_START*cos(M_PI/3), DEFAULT_START*sin(M_PI/3));
+  cairo_line_to (cr, MAX_RANGE*cos(M_PI/3), MAX_RANGE*sin(M_PI/3));
+  cairo_stroke(cr);
+
+  cairo_move_to (cr, DEFAULT_START*cos(M_PI/6), DEFAULT_START*sin(M_PI/6));
+  cairo_line_to (cr, MAX_RANGE*cos(M_PI/6), MAX_RANGE*sin(M_PI/6));
+  cairo_stroke(cr);
+
+  cairo_move_to (cr, DEFAULT_START*cos(M_PI/6*4), DEFAULT_START*sin(M_PI/6*4));
+  cairo_line_to (cr, MAX_RANGE*cos(M_PI/6*4), MAX_RANGE*sin(M_PI/6*4));
+  cairo_stroke(cr);
+
+  cairo_move_to (cr, DEFAULT_START*cos(M_PI/6*5), DEFAULT_START*sin(M_PI/6*5));
+  cairo_line_to (cr, MAX_RANGE*cos(M_PI/6*5), MAX_RANGE*sin(M_PI/6*5));
+  cairo_stroke(cr);
+
+  cairo_move_to (cr, DEFAULT_START*cos(0), DEFAULT_START*sin(0));
+  cairo_line_to (cr, MAX_RANGE*cos(0), MAX_RANGE*sin(0));
+  cairo_stroke(cr);
+
+  cairo_move_to (cr, DEFAULT_START*cos(M_PI), DEFAULT_START*sin(M_PI));
+  cairo_line_to (cr, MAX_RANGE*cos(M_PI), MAX_RANGE*sin(M_PI));
+  cairo_stroke(cr);
+
+  cairo_arc(cr, 0, 0, MAX_RANGE, 0, M_PI);
   cairo_stroke(cr);  
-  cairo_arc(cr, 0, 0, 100, 0, M_PI);
+  cairo_arc(cr, 0, 0, MAX_RANGE/4*3, 0, M_PI);
   cairo_stroke(cr);  
-  cairo_arc(cr, 0, 0, 200, 0, M_PI);
+  cairo_arc(cr, 0, 0, MAX_RANGE/2, 0, M_PI);
+  cairo_stroke(cr);  
+  cairo_arc(cr, 0, 0, MAX_RANGE/4, 0, M_PI);
   cairo_stroke(cr);   
+
+  cairo_set_line_width(cr, 10);  
+  cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
+  cairo_set_source_rgb(cr, 1, 0, 0);
+
+  cairo_move_to (cr, DEFAULT_START*cos(M_PI/180*1), DEFAULT_START*sin(M_PI/180*1));
+  cairo_line_to (cr, MAX_RANGE*cos(M_PI/180*1), MAX_RANGE*sin(M_PI/180*1));
+  cairo_stroke(cr);
 }
-
-static gboolean clicked(GtkWidget *widget, GdkEventButton *event, gpointer user_data)
-{
-    printf("event->button: %d\n", event->button);
-    if (event->button == 1) {
-        glob.coordx[glob.count] = event->x;
-        glob.coordy[glob.count++] = event->y;
-    }
-
-    if (event->button == 3) {
-        gtk_widget_queue_draw(widget);
-    }
-
-    return TRUE;
-}
-
 
 int main(int argc, char *argv[])
 {
@@ -92,16 +114,18 @@ int main(int argc, char *argv[])
 
   g_signal_connect(G_OBJECT(darea), "draw", G_CALLBACK(on_draw_event), NULL); 
   g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);  
-    
-  //g_signal_connect(window, "button-press-event", G_CALLBACK(clicked), NULL);
- 
+   
   gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
-  gtk_window_set_default_size(GTK_WINDOW(window), 800, 600); 
-  gtk_window_set_title(GTK_WINDOW(window), "Lines");
+  gtk_window_set_default_size(GTK_WINDOW(window), 900, 600); 
+  gtk_window_set_title(GTK_WINDOW(window), "Sonar test");
 
   gtk_widget_show_all(window);
 
+
+
   gtk_main();
+
+  
 
   return 0;
 }
