@@ -22,7 +22,10 @@ int write_buf(int fd, uint8_t* buf, int n){
         }
         //if(i%4==0) sleep(1);
     }
-    
+    for(i=0; i<n; i++){
+        printf("%x ", buf[i]);
+    }
+    printf("\n");
     return bytes_sent;
 }
 
@@ -32,16 +35,15 @@ int client_send_packet(Packet* packet, int fd){
     
     uint8_t buf[52]={0};
     buf[0]=0xaa;
-    //buf[1]=0x55;
+    buf[1]=0x55;
     uint8_t n=0;
 
     int i;
     switch (type){
         case COMMAND:
-
-            for(i=0; i<sizeof(CommandPacket); i++){
-                buf[i+1] = *(((uint8_t*) packet)+i);
-                n++;
+            n=sizeof(CommandPacket);
+            for(i=0; i<n; i++){
+                buf[i+3] = *(((uint8_t*) packet)+i);
             }
             break;
 
@@ -49,19 +51,18 @@ int client_send_packet(Packet* packet, int fd){
         
 
         case STATUS:
-
-            for(i=0; i<sizeof(StatusPacket); i++){
-                buf[i+1] = *(((uint8_t*) packet)+i);
-                n++;
+            n=sizeof(StatusPacket);
+            for(i=0; i<n; i++){
+                buf[i+3] = *(((uint8_t*) packet)+i);
             }
             break;
         
 
         //should client send an error packet??
         case ERROR:
-
-            for(i=0; i<sizeof(ErrorPacket); i++){
-                buf[i+1] = *(((uint8_t*) packet)+i);
+            n=sizeof(ErrorPacket);
+            for(i=0; i<n; i++){
+                buf[i+3] = *(((uint8_t*) packet)+i);
                 n++;
             }
             break;
@@ -70,11 +71,11 @@ int client_send_packet(Packet* packet, int fd){
             break;
     }
 
-    //buf[2] = (uint8_t)n;
-    buf[n+1] = calcute_checksum(buf, n+1);  //header included
+    buf[2] = (uint8_t)n;
+    buf[n+3] = calculate_checksum(buf, n+3);  //header included
 
 
-    int ret = write_buf(fd, buf, n+2);
+    int ret = write_buf(fd, buf, n+4);
     return ret;
 }
 
@@ -130,7 +131,7 @@ Packet* client_receive_packet(int fd){
 
     //printf("received[%d]: %x\n", 3+count ,buf[3+count]);
  
-    unsigned char cs = calcute_checksum(buf, count+3);
+    unsigned char cs = calculate_checksum(buf, count+3);
 
     if(cs != buf[count+3]){
         printf("Packet received corrupted, start again\n");
