@@ -2,7 +2,7 @@
  * @author Christian Vari
  * @email vari.christian@gmail.com
  * @create date 2019-03-08 12:16:07
- * @modify date 2019-03-08 12:16:07
+ * @modify date 2019-03-08 18:45:10
  * @desc USART Library 
  */
 
@@ -31,8 +31,8 @@ void UART_init() {
     da_leggere = 0;
 
 
-    UCSR0C = _BV(UCSZ01) | _BV(UCSZ00); /* 8-bit data */ 
-    UCSR0B = _BV(RXEN0) | _BV(TXEN0) | _BV(RXCIE0);   /* Enable RX and TX */  
+    UCSR0C = _BV(UCSZ01) | _BV(UCSZ00); // Dati a 8 bit
+    UCSR0B = _BV(RXEN0) | _BV(TXEN0) | _BV(RXCIE0);   // Abilito TX e RX su UART
     sei();
 }
 
@@ -147,5 +147,5 @@ void arduino_send_packet(Packet* packet){
 
     data_to_send[data_to_send_length] = calculate_checksum(data_to_send, data_to_send_length);
 
-    UCSR0B |= _BV(UDRIE0);
+    UCSR0B |= _BV(UDRIE0); // Attivo l'interrupt per inviare
 }
