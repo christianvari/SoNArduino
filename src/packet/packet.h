@@ -8,7 +8,8 @@
 //commands
 #define START 0
 #define STOP 1
-#define SET 2
+#define SET_VELOCITY 2
+#define SET_PRECISION 3
 
 
 typedef struct{
@@ -18,6 +19,7 @@ typedef struct{
 typedef struct {
     Packet packet;
     uint8_t command;
+    uint8_t payload;
 }CommandPacket;
 
 typedef struct{

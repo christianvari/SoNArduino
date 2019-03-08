@@ -12,7 +12,7 @@ volatile uint8_t da_leggere;
 volatile uint8_t stato_receive;
 volatile uint8_t stato_to_send;
 volatile uint8_t data_to_send_length;
-uint8_t data_received[5];
+uint8_t data_received[6];
 uint8_t data_to_send[10];
 
 
@@ -43,13 +43,14 @@ uint8_t arduino_receive_packet(CommandPacket* packet){
 
     if (!da_leggere) return 0;
 
-    if(calculate_checksum(data_received, 3) != data_received[4]){
+    if(calculate_checksum(data_received, 4) != data_received[5]){
         da_leggere = 0;
         return 0;
     }
 
     packet->packet.type = data_received[2];
     packet->command = data_received[3];
+    packet->payload = data_received[4];
 
     da_leggere = 0;
     return 1;
@@ -80,12 +81,13 @@ ISR(USART0_RX_vect) {
         
         case 2:
         case 3:
+        case 4:
             data_received [stato_receive] = c;
             stato_receive++;
             break;
-        case 4:
+        case 5:
             
-            data_received [4] = c;
+            data_received [5] = c;
             stato_receive=0;
             da_leggere = 1;
             break;
