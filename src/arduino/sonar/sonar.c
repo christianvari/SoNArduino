@@ -44,7 +44,7 @@ uint16_t readSonar(void){
     while(!(ECHO_PIN & (1<<ECHO_BIT))){     // Aspetto che il pin di echo venga alzato
         trig_counter++;
         if (trig_counter > SONAR_TIMEOUT){
-            return TRIG_ERROR;
+            return SONAR_OUT_OF_RANGE;
         }
     }
  
@@ -55,12 +55,13 @@ uint16_t readSonar(void){
  
     while((ECHO_PIN & (1<<ECHO_BIT))){    // Aspetto che il pin venga abbassato
         if (((overFlowCounter*TIMER_MAX)+TCNT3) > SONAR_TIMEOUT){
-            return ECHO_ERROR;            // L'oggetto è fuori dal range massimo
+            return SONAR_OUT_OF_RANGE;            // L'oggetto è fuori dal range massimo
         }
     };
  
     TCCR3B = 0x00;                      // fermo il timer
     dist_in_cm = (((overFlowCounter*TIMER_MAX)+TCNT3)/(TO_CM*ISTRUZIONI_US));   // distance in cm
+    _delay_ms(SONAR_DELAY);
     return (dist_in_cm);
 }
 
@@ -71,17 +72,15 @@ uint16_t getDistance(uint8_t precision){
     int i;
     for(i = 0; i< precision; i++){
         tmp = readSonar();
-        if(tmp == TRIG_ERROR)
-            return TRIG_ERROR;
-        else if (tmp == ECHO_ERROR)
+        if (tmp == SONAR_OUT_OF_RANGE)
             continue;
         distance+= tmp;
         reads++;
     }
-    if(reads != 0){
-        distance=(distance)/reads;
+    if(reads + MIN_READS > precision){
+        distance=(distance/reads) + 0.5;
         return distance;
     }
-    return ECHO_ERROR;
+    return SONAR_OUT_OF_RANGE;
 
 }

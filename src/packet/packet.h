@@ -35,8 +35,7 @@ typedef struct{
 
 enum Error_Code{
     CantHandleCommand = 0x0,
-    SetOutOfRange = 0x1,
-    TriggerError = 0x2
+    SetOutOfRange = 0x1
 
 } ;
 
