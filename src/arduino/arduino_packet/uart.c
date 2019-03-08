@@ -143,7 +143,7 @@ ISR(USART0_UDRE_vect){
 }
 
 
-void arduino_create_packet(Packet* packet){
+void arduino_send_packet(Packet* packet){
 
     data_to_send[0] = 0xaa;
     data_to_send[1] = 0x55; 
