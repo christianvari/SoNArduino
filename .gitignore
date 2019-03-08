@@ -2,3 +2,4 @@
 *.hex
 *.elf
 /.vscode
+src/client/tests/gtk_test
