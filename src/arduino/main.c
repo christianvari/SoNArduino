@@ -115,17 +115,11 @@ int main(void){
                 modifyAngle(direction, velocity);
 
                 distance = getDistance(precision);
-                if(distance == TRIG_ERROR){
-                    error_packet.error_code = TriggerError;
-                    arduino_send_packet((Packet*) (&error_packet));
-                    status = STATUS_SLEEP;
-                }
-
                 status_packet.angle= angle;
                 status_packet.distance = distance;
                 arduino_send_packet((Packet*) (&status_packet));
 
-                _delay_ms(50);
+                //_delay_ms(50);
 
                 break;
         }

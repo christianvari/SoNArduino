@@ -42,6 +42,7 @@ uint8_t setAngle(uint8_t angle){
 	
 	OCR1B =(SG90_WIDTH/180 * angle + SG90_MIN_ANGLE)+0.5;
 
+	_delay_ms(50);
 	return 0;
 
 }

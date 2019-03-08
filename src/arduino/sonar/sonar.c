@@ -21,7 +21,7 @@ void initSonar(){
  * Invia il segnale di trigger
  *
  */
-void trigger_sonar(){
+void trigger_sonar(void){
     TRIG_PORT &= ~(1<<TRIG_BIT);             // Abbasso il pin del trigger
     _delay_us(1);                       
     TRIG_PORT |=(1<<TRIG_BIT);               // Alzo il pin
@@ -36,7 +36,7 @@ ISR(TIMER3_OVF_vect){       // Timer1 overflow interrupt
 }
 
 
-uint16_t readSonar(){
+uint16_t readSonar(void){
     uint16_t dist_in_cm = 0;
     uint32_t trig_counter = 0;
     trigger_sonar();                    
@@ -44,7 +44,7 @@ uint16_t readSonar(){
     while(!(ECHO_PIN & (1<<ECHO_BIT))){     // Aspetto che il pin di echo venga alzato
         trig_counter++;
         if (trig_counter > SONAR_TIMEOUT){
-            return TRIG_ERROR;
+            return SONAR_OUT_OF_RANGE;
         }
     }
  
@@ -55,30 +55,32 @@ uint16_t readSonar(){
  
     while((ECHO_PIN & (1<<ECHO_BIT))){    // Aspetto che il pin venga abbassato
         if (((overFlowCounter*TIMER_MAX)+TCNT3) > SONAR_TIMEOUT){
-            return ECHO_ERROR;            // L'oggetto è fuori dal range massimo
+            return SONAR_OUT_OF_RANGE;            // L'oggetto è fuori dal range massimo
         }
     };
  
     TCCR3B = 0x00;                      // fermo il timer
     dist_in_cm = (((overFlowCounter*TIMER_MAX)+TCNT3)/(TO_CM*ISTRUZIONI_US));   // distance in cm
+    _delay_ms(SONAR_DELAY);
     return (dist_in_cm);
 }
 
 uint16_t getDistance(uint8_t precision){
-    uint16_t distance = ECHO_ERROR;
+    uint16_t distance = 0;
     uint16_t tmp;
     uint8_t reads = 0;
     int i;
     for(i = 0; i< precision; i++){
         tmp = readSonar();
-        if(tmp == TRIG_ERROR)
-            return TRIG_ERROR;
-        else if (tmp == ECHO_ERROR)
+        if (tmp == SONAR_OUT_OF_RANGE)
             continue;
         distance+= tmp;
         reads++;
     }
-    distance=(distance - ECHO_ERROR)/reads;
-
+    if(reads + MIN_READS > precision){
+        distance=(distance/reads) + 0.5;
+        return distance;
+    }
+    return SONAR_OUT_OF_RANGE;
 
 }

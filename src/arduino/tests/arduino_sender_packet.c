@@ -1,4 +1,4 @@
-#include "../arduino_packet/arduino_packet.h"
+#include "../arduino_packet/uart.h"
 #include <util/delay.h>
 
 
@@ -10,44 +10,28 @@ int main(void){
     Packet spacket;
     Packet epacket;
     UART_init();
-
+    Packet spacket;
     spacket.type=STATUS;
 
     StatusPacket statusPacket;
     statusPacket.packet=spacket;
-    statusPacket.angle=52;
-    statusPacket.distance=1;
+    statusPacket.angle=0;
+    statusPacket.distance=0;
 
-
-    epacket.type=ERROR;
-
-    ErrorPacket errorPacket;
-
-    errorPacket.packet=epacket;
-    errorPacket.error_code = OutRange;
+    Packet cpacket;
+    cpacket.type = COMMAND;
+    CommandPacket commandpacket;
+    commandpacket.packet = cpacket;
+    commandpacket.command = 99;
 
     int verso=DESTRA;
     while(1){
-        arduino_send_packet((Packet*)(&statusPacket));
 
-        if(verso==DESTRA && statusPacket.angle<180){
-            statusPacket.angle++;
-            statusPacket.distance++;
-        }else if(verso==SINISTRA && statusPacket.angle>0){
-            statusPacket.angle--;
-            statusPacket.distance--;
-        }else if(verso==DESTRA && statusPacket.angle>=180){
-            statusPacket.angle--;
-            statusPacket.distance--;
-            verso=SINISTRA;
-        }else if(verso==SINISTRA && statusPacket.angle<=0){
-            statusPacket.angle++;
-            statusPacket.distance++;
-            verso=DESTRA;
+        if(arduino_receive_packet(&commandpacket)){
+
+            statusPacket.angle = 44;
+            arduino_send_packet((Packet*)(&statusPacket));
         }
-
-        //arduino_send_packet((Packet*)(&errorPacket));
-
 
         _delay_ms(500); // from delay.h, wait 1 sec
     }

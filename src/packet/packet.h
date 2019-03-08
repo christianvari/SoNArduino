@@ -25,7 +25,7 @@ typedef struct {
 typedef struct{
     Packet packet;
     uint8_t angle;
-    uint8_t distance;
+    uint16_t distance;
 }StatusPacket;
 
 typedef struct{
@@ -35,10 +35,11 @@ typedef struct{
 
 enum Error_Code{
     CantHandleCommand = 0x0,
-    SetOutOfRange = 0x1,
-    TriggerError = 0x2
+    SetOutOfRange = 0x1
 
 } ;
 
 
 uint8_t calculate_checksum(uint8_t *, int );
+
+uint16_t concatenateBytes(uint8_t byte1, uint8_t byte2);
