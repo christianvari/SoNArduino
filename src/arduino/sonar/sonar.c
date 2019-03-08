@@ -21,7 +21,7 @@ void initSonar(){
  * Invia il segnale di trigger
  *
  */
-void trigger_sonar(){
+void trigger_sonar(void){
     TRIG_PORT &= ~(1<<TRIG_BIT);             // Abbasso il pin del trigger
     _delay_us(1);                       
     TRIG_PORT |=(1<<TRIG_BIT);               // Alzo il pin
@@ -36,8 +36,8 @@ ISR(TIMER3_OVF_vect){       // Timer1 overflow interrupt
 }
 
 
-uint16_t readSonar(){
-    uint16_t dist_in_cm = 0;
+uint8_t readSonar(void){
+    uint8_t dist_in_cm = 0;
     uint32_t trig_counter = 0;
     trigger_sonar();                    
 
@@ -64,9 +64,9 @@ uint16_t readSonar(){
     return (dist_in_cm);
 }
 
-uint16_t getDistance(uint8_t precision){
-    uint16_t distance = ECHO_ERROR;
-    uint16_t tmp;
+uint8_t getDistance(uint8_t precision){
+    uint8_t distance = ECHO_ERROR;
+    uint8_t tmp;
     uint8_t reads = 0;
     int i;
     for(i = 0; i< precision; i++){
@@ -80,5 +80,6 @@ uint16_t getDistance(uint8_t precision){
     }
     distance=(distance - ECHO_ERROR)/reads;
 
+    return distance;
 
 }
