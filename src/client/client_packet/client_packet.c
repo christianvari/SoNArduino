@@ -78,7 +78,7 @@ int client_send_packet(Packet* packet, int fd){
     return ret;
 }
 
-Packet* client_receive_packet(Packet* packet, int fd){
+Packet* client_receive_packet(int fd){
     unsigned char buf[52]={0};
     
     // riguarda per togliere i goto
@@ -138,6 +138,7 @@ Packet* client_receive_packet(Packet* packet, int fd){
     }
 
     //dentro a buf c'è il pacchetto con head e check
+    Packet *packet;
     switch (buf[3])
     {
         case COMMAND:

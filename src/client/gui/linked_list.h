@@ -20,8 +20,8 @@ void List_init(ListHead* head, int max_length);
 //set the max size of the list
 void List_set_max_length(ListHead* head, int max_length);
 
-//add item in the head of the list, if all ok return item else NULL
-ListItem* List_insert(ListHead* head, ListItem* item);
+//add item in the head of the list, if all ok return the added item else NULL
+ListItem* List_insert(ListHead* head, uint8_t angle, uint8_t distance);
 
 //deletes all nodes of the list
 int List_reset(ListHead* head);

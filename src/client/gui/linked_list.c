@@ -14,10 +14,18 @@ void List_set_max_length(ListHead* head, int max_length){
 }
 
 
-ListItem* List_insert(ListHead* head, ListItem* item) {
+ListItem* List_insert(ListHead* head, uint8_t angle, uint8_t distance) {
+
+  ListItem *item = malloc(sizeof(ListItem));
+  if(!item){perror("Error in malloc"); return NULL;}
+  item->next=NULL;
+  item->prev=NULL;
+  item->angle=angle;
+  item->distance=distance;
+
   if(head->first==0){
-    if(head->max_length==0) return NULL;
-    printf("caso1\n");
+    //if(head->max_length==0) return NULL;
+    //printf("caso1\n");
     head->first=item;
     head->last=item;
     head->size=1;
@@ -25,7 +33,7 @@ ListItem* List_insert(ListHead* head, ListItem* item) {
   }
 
   if(head->size+1 <= head->max_length){
-    printf("caso2\n");
+    //printf("caso2\n");
 
     item->next=head->first;
     head->first->prev=item;
@@ -34,7 +42,7 @@ ListItem* List_insert(ListHead* head, ListItem* item) {
     return item;
   }
   
-  printf("caso3\n");
+  //printf("caso3\n");
   ListItem* t=head->last;
   head->last=head->last->prev;
   t->prev->next=NULL;
