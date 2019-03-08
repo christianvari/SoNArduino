@@ -1,3 +1,11 @@
+/**
+ * @author Christian Vari
+ * @email vari.christian@gmail.com
+ * @create date 2019-03-08 12:16:07
+ * @modify date 2019-03-08 12:16:07
+ * @desc USART Library 
+ */
+
 #include "uart.h"
 
 
