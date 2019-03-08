@@ -1,6 +1,9 @@
 #include "../arduino_packet/arduino_packet.h"
 #include <util/delay.h>
-#include <stdio.h>
+
+
+#define DESTRA 0
+#define SINISTRA 1
 
 int main(void){
 
@@ -23,16 +26,29 @@ int main(void){
     errorPacket.packet=epacket;
     errorPacket.error_code = OutRange;
 
+    int verso=DESTRA;
     while(1){
         arduino_send_packet((Packet*)(&statusPacket));
 
-        statusPacket.angle++;
-        statusPacket.distance++;
+        if(verso==DESTRA && statusPacket.angle<180){
+            statusPacket.angle++;
+            statusPacket.distance++;
+        }else if(verso==SINISTRA && statusPacket.angle>0){
+            statusPacket.angle--;
+            statusPacket.distance--;
+        }else if(verso==DESTRA && statusPacket.angle>=180){
+            statusPacket.angle--;
+            statusPacket.distance--;
+            verso=SINISTRA;
+        }else if(verso==SINISTRA && statusPacket.angle<=0){
+            statusPacket.angle++;
+            statusPacket.distance++;
+            verso=DESTRA;
+        }
 
-        arduino_send_packet((Packet*)(&errorPacket));
+        //arduino_send_packet((Packet*)(&errorPacket));
 
-        //arduino_print_packet((Packet*)(&statusPacket));
 
-        _delay_ms(1000); // from delay.h, wait 1 sec
+        _delay_ms(500); // from delay.h, wait 1 sec
     }
 }
