@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <time.h>
 #include "gui/linked_list.h"
 #include "./client_packet/client_packet.h"
 
@@ -33,6 +34,16 @@ int fd;
 GtkWidget *darea;
 int MAX_RANGE = 400;
 int DEFAULT_START = 80;
+pthread_t reader;
+GtkWidget *start_button, *stop_button, *connect_button, *disconnect_button;
+int connected = 0;
+int started = 0;
+int configured = 0;
+
+
+/**================================================== *
+ * ==========  SERIAL FUNCTIONS  ========== *
+ * ================================================== */
 
 int serial_set_interface_attribs(int fd, int speed, int parity){
     struct termios tty;
@@ -75,6 +86,25 @@ int serial_set_interface_attribs(int fd, int speed, int parity){
     return 0;
 }
 
+int open_serial(){
+    fd = open("/dev/ttyACM0", O_RDWR | O_NOCTTY | O_SYNC);
+    if(fd<0){
+        perror("Error opening serial");
+        return -1;
+    }
+
+    int ret = serial_set_interface_attribs(fd, 57600, 0);
+    if (ret!=0){
+        perror("Error setting serial interface");
+        return -1;
+    }
+    return 0;
+}
+
+/**================================================== *
+ * ==========  DRAWING FUNCTIONS  ========== *
+ * ================================================== */
+
 static void do_drawing(cairo_t *, GtkWidget*);
 
 struct {
@@ -84,11 +114,6 @@ struct {
   ListHead* head;
   double line_width;
 } glob;
-
-static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, gpointer user_data){
-  do_drawing(cr, widget);
-  return FALSE;
-}
 
 void draw_line(cairo_t *cr, uint8_t angle, uint8_t distance, double transparence){
 
@@ -180,20 +205,9 @@ static void do_drawing(cairo_t *cr, GtkWidget *widget){
 
 }
 
-static void start_handler(GtkWidget *widget, gpointer data){
-    Packet packet;
-    packet.type = COMMAND;
-    CommandPacket commandPacket;
-    commandPacket.command = START;
-    commandPacket.payload = 0;
-    client_send_packet((Packet*)(&commandPacket), fd);
-}
-
-static gboolean time_handler(GtkWidget *widget){
-  gtk_widget_queue_draw(widget);
-  
-  return TRUE;
-}
+/**================================================== *
+ * ==========  THREADS WORK  ========== *
+ * ================================================== */
 
 void* reader_work(void* x) {
 
@@ -201,12 +215,38 @@ void* reader_work(void* x) {
     int bytes_read=0;
     int ret;
     Packet *packet;
-    while(1){
+    while(connected){
         packet = client_receive_packet(fd);
         //client_print_packet(packet);
         if(packet->type==STATUS){
         //FAI ROBA
             List_insert(glob.head, ((StatusPacket*)packet)->angle, ((StatusPacket*)packet)->distance);
+        }else if(packet->type==EVENT){
+            switch (((EventPacket*)packet)->event)
+            {
+                case STARTED:
+                    printf("start received\n");
+                    started = 1;
+                    break;
+
+                case STOPPED:
+                    printf("stop received\n");
+                    started = 0;
+                    List_reset(glob.head);
+                    break;
+
+                case DISCONNECTED:
+                    printf("disconnect received\n");
+                    connected = 0;
+                    break;
+                default:
+                    printf("UnKnown Event received\n");
+                    break;
+            }
+        }else if(packet->type == CONFIGURATION){
+            //Configura
+        }else if(packet->type == ERROR){
+            printf("Error received: error code %d\n", ((ErrorPacket*)(packet))->error_code);
         }
 
 
@@ -215,25 +255,131 @@ void* reader_work(void* x) {
     pthread_exit(NULL);
 }
 
-int open_serial(){
-    fd = open("/dev/ttyACM0", O_RDWR | O_NOCTTY | O_SYNC);
-    if(fd<0){
-        perror("Error opening serial");
-        return -1;
+/**================================================== *
+ * ==========  EVENT HANDLER  ========== *
+ * ================================================== */
+
+static void connect_handler(GtkWidget *widget, gpointer data){
+
+    int ret = open_serial();
+    if(ret){
+        perror("Error in open_serial");
+        exit(EXIT_FAILURE);
+    }
+    connected=1;
+    ret = pthread_create(&reader, NULL, reader_work, NULL);
+    if (ret != 0) { fprintf(stderr, "Error %d in pthread_create\n", ret); exit(EXIT_FAILURE); }
+    printf("Connected\n");
+    gtk_widget_set_sensitive (connect_button, FALSE);
+    gtk_widget_set_sensitive (disconnect_button, TRUE);
+    gtk_widget_set_sensitive (start_button, TRUE);
+    gtk_widget_set_sensitive (stop_button, FALSE);
+
+}
+
+static void start_handler(GtkWidget *widget, gpointer data){
+    Packet packet;
+    packet.type = COMMAND;
+    CommandPacket commandPacket;
+    commandPacket.packet = packet;
+    commandPacket.command = START;
+    commandPacket.payload = 0;
+
+
+    struct timespec str;
+    str.tv_sec=0;
+    str.tv_nsec=350000000;
+    while(!started){
+
+        client_send_packet((Packet*)(&commandPacket), fd);
+
+        nanosleep(&str, NULL);
+
     }
 
-    int ret = serial_set_interface_attribs(fd, 57600, 0);
-    if (ret!=0){
-        perror("Error setting serial interface");
-        return -1;
-    }
-    return 0;
+    gtk_widget_set_sensitive (connect_button, FALSE);
+    gtk_widget_set_sensitive (disconnect_button, FALSE);
+    gtk_widget_set_sensitive (start_button, FALSE);
+    gtk_widget_set_sensitive (stop_button, TRUE);
 }
+
+static void stop_handler(GtkWidget *widget, gpointer data){
+    Packet packet;
+    packet.type = COMMAND;
+    CommandPacket commandPacket;
+    commandPacket.packet = packet;
+    commandPacket.command = STOP;
+    commandPacket.payload = 0;
+
+    struct timespec str;
+    str.tv_sec=0;
+    str.tv_nsec=350000000;
+    while(started){
+
+        client_send_packet((Packet*)(&commandPacket), fd);
+
+        nanosleep(&str, NULL);
+
+    }
+
+    gtk_widget_set_sensitive (connect_button, FALSE);
+    gtk_widget_set_sensitive (disconnect_button, TRUE);
+    gtk_widget_set_sensitive (start_button, TRUE);
+    gtk_widget_set_sensitive (stop_button, FALSE);
+}
+
+static void disconnect_handler(GtkWidget *widget, gpointer data){
+
+    Packet packet;
+    packet.type = COMMAND;
+    CommandPacket commandPacket;
+    commandPacket.packet = packet;
+    commandPacket.command = DISCONNECTION;
+    commandPacket.payload = 0;
+
+    struct timespec str;
+    str.tv_sec=0;
+    str.tv_nsec=300000000;
+    while(connected){
+
+        client_send_packet((Packet*)(&commandPacket), fd);
+
+        nanosleep(&str, NULL);
+
+    }
+
+    pthread_join(reader, NULL);
+
+    close(fd);
+
+    gtk_widget_set_sensitive (connect_button, TRUE);
+    gtk_widget_set_sensitive (disconnect_button, FALSE);
+    gtk_widget_set_sensitive (start_button, FALSE);
+    gtk_widget_set_sensitive (stop_button, FALSE);
+    
+    
+}
+
+static gboolean time_handler(GtkWidget *widget){
+  gtk_widget_queue_draw(widget);
+  
+  return TRUE;
+}
+
+static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, gpointer user_data){
+  do_drawing(cr, widget);
+  return FALSE;
+}
+
+
+/**================================================== *
+ * ==========  MAIN  ========== *
+ * ================================================== */
 
 int main(int argc, char *argv[])
 {
     GtkWidget *window, *main_box, *left_box, *first_row, *second_row, *third_row, *fourth_row;
-    GtkWidget *start_button, *stop_button, *connect_button, *disconnect_button;
+    
     GtkWidget *speed_scale, *speed_label;
     GtkWidget *accuracy_scale, *accuracy_label;
 
@@ -257,14 +403,21 @@ int main(int argc, char *argv[])
     fourth_row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
 
     connect_button = gtk_button_new_with_label ("CONNECT");
+    g_signal_connect (connect_button, "clicked", G_CALLBACK (connect_handler), NULL);
     disconnect_button = gtk_button_new_with_label ("DISCONNECT");
+    g_signal_connect (disconnect_button, "clicked", G_CALLBACK (disconnect_handler), NULL);
+    gtk_widget_set_sensitive (disconnect_button, FALSE);
     gtk_box_pack_start((GtkBox*)first_row, connect_button, TRUE, TRUE, 30);
     gtk_box_pack_start((GtkBox*)first_row, disconnect_button, TRUE, TRUE, 30);
     gtk_box_pack_start((GtkBox*)left_box, first_row, TRUE, TRUE, 30);
 
     start_button = gtk_button_new_with_label ("START");
+    gtk_widget_set_sensitive (start_button, FALSE);
     g_signal_connect (start_button, "clicked", G_CALLBACK (start_handler), NULL);
     stop_button = gtk_button_new_with_label ("STOP");
+    gtk_widget_set_sensitive (stop_button, FALSE);
+    g_signal_connect (stop_button, "clicked", G_CALLBACK (stop_handler), NULL);
+
     gtk_box_pack_start((GtkBox*)second_row, start_button, TRUE, TRUE, 30);
     gtk_box_pack_start((GtkBox*)second_row, stop_button, TRUE, TRUE, 30);
     gtk_box_pack_start((GtkBox*)left_box, second_row, TRUE, TRUE, 30);
@@ -298,16 +451,6 @@ int main(int argc, char *argv[])
     //refresh 10 times per sec (100millisec)
     g_timeout_add(100, (GSourceFunc) time_handler, (gpointer) window);
 
-    int ret = open_serial();
-    if(ret){
-        perror("Error in open_serial");
-        exit(EXIT_FAILURE);
-    }
-    pthread_t reader;
-    ret = pthread_create(&reader, NULL, reader_work, NULL);
-    if (ret != 0) { fprintf(stderr, "Error %d in pthread_create\n", ret); exit(EXIT_FAILURE); }
-
-    
     
     //need to free list
 
