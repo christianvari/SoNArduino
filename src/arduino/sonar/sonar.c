@@ -60,9 +60,14 @@ uint8_t readSonar(void){
     };
  
     TCCR3B = 0x00;                      // fermo il timer
-    dist_in_cm = (((overFlowCounter*TIMER_MAX)+TCNT3)/(TO_CM*ISTRUZIONI_US));   // distance in cm
+    dist_in_cm = ((double)((overFlowCounter*TIMER_MAX)+TCNT3)/(TO_CM*ISTRUZIONI_US));   // distance in cm
+
     _delay_ms(SONAR_DELAY);
-    return (dist_in_cm);
+
+    //max dist 64 cm
+    if(dist_in_cm>64) return SONAR_OUT_OF_RANGE;
+
+    return (dist_in_cm*4);
 }
 
 uint8_t getDistance(uint8_t precision){
