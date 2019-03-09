@@ -140,7 +140,21 @@ void arduino_send_packet(Packet* packet){
                 data_to_send[3+i]= (*((uint8_t*)(packet+i)));
             }
             data_to_send_length += sizeof(ErrorPacket)+1;
-            break;    
+            break;  
+        case EVENT:
+            data_to_send[2]=(uint8_t) sizeof(EventPacket);
+            for(i=0; i<sizeof(EventPacket);i++){
+                data_to_send[3+i]= (*((uint8_t*)(packet+i)));
+            }
+            data_to_send_length += sizeof(EventPacket)+1;
+            break;  
+        case CONFIGURATION:
+            data_to_send[2]=(uint8_t) sizeof(ConfigurationPacket);
+            for(i=0; i<sizeof(ConfigurationPacket);i++){
+                data_to_send[3+i]= (*((uint8_t*)(packet+i)));
+            }
+            data_to_send_length += sizeof(ConfigurationPacket)+1;
+            break;  
         default:
             break;
     }

@@ -44,13 +44,22 @@ int main(void){
     ErrorPacket error_packet;
     error_packet.packet = epacket;
 
+    Packet evpacket;
+    evpacket.type = EVENT;
+    EventPacket event_packet;
+    event_packet.packet = evpacket;
+
+    Packet cgpacket;
+    cgpacket.type = CONFIGURATION;
+    ConfigurationPacket config_packet;
+    config_packet.packet = cgpacket;
 
     while(1){
 
         if(arduino_receive_packet(&command_packet)){
             command = command_packet.command;
             data = command_packet.payload;
-            if(command == START || command==STOP || command == SET_VELOCITY || command == SET_PRECISION)
+            if(command == START || command==STOP || command == SET_VELOCITY || command == SET_PRECISION || command == SEND_CONFIG || command == DISCONNECTION)
                 have_to_set_command = 1;
         }
 
@@ -64,8 +73,13 @@ int main(void){
                             initServo();
                             initSonar();
                             status = STATUS_WORKING;
+                            event_packet.event = STARTED;
+                            arduino_send_packet((Packet*)(&event_packet));
                             break;
-
+                        case STOP:
+                            event_packet.event = STOPPED;
+                            arduino_send_packet((Packet*)(&event_packet));
+                            break;
                         case SET_PRECISION:
                             if(save(data, ADDR_PRECISION)){
                                 error_packet.error_code = SetOutOfRange;
@@ -73,6 +87,8 @@ int main(void){
                             }
                             else
                                 precision = data;
+                                event_packet.event = SETTED_PRECISION;
+                                arduino_send_packet((Packet*)(&event_packet));
                             break;
                         case SET_VELOCITY:
                             if(save(data, ADDR_VELOCITY)){
@@ -81,6 +97,17 @@ int main(void){
                             }
                             else
                                 velocity = data;
+                                event_packet.event = SETTED_VELOCITY;
+                                arduino_send_packet((Packet*)(&event_packet));
+                            break;
+                        case SEND_CONFIG:
+                            config_packet.velocity = velocity;
+                            config_packet.precision = precision;
+                            arduino_send_packet((Packet*)(&config_packet));
+                            break;
+                        case DISCONNECTION:
+                            event_packet.event = DISCONNECTED;
+                            arduino_send_packet((Packet*)(&event_packet));
                             break;
                         default:
                             error_packet.error_code = CantHandleCommand;
@@ -94,10 +121,18 @@ int main(void){
             case STATUS_WORKING:
                 if(have_to_set_command){
                     switch (command)
-                    {
+                    {   
+                        
+                        case START:
+                            event_packet.event = STARTED;
+                            arduino_send_packet((Packet*)(&event_packet));
+                            break;
+                            
                         case STOP:
                             setAngle(0);
                             status = STATUS_SLEEP;
+                            event_packet.event = STOPPED;
+                            arduino_send_packet((Packet*)(&event_packet));
                             break;
                         default:
                             error_packet.error_code = CantHandleCommand;

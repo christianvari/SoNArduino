@@ -66,7 +66,9 @@ int client_send_packet(Packet* packet, int fd){
                 n++;
             }
             break;
-    
+
+        //client doesn't send Events and Configurations
+        
         default:
             break;
     }
@@ -164,6 +166,22 @@ Packet* client_receive_packet(int fd){
             ((ErrorPacket*)packet)->error_code = ((ErrorPacket*)(buf+3))->error_code;
             
             break;
+        case EVENT:
+
+            packet = (Packet*)malloc(sizeof(EventPacket));
+            packet->type = ((EventPacket*)(buf+3))->packet.type;
+            ((EventPacket*)packet)->event = ((EventPacket*)(buf+3))->event;
+        
+            break; 
+        case CONFIGURATION:
+
+            packet = (Packet*)malloc(sizeof(ConfigurationPacket));
+            packet->type = ((ConfigurationPacket*)(buf+3))->packet.type;
+            ((ConfigurationPacket*)packet)->precision = ((ConfigurationPacket*)(buf+3))->precision;
+            ((ConfigurationPacket*)packet)->velocity = ((ConfigurationPacket*)(buf+3))->velocity;
+
+            break; 
+        
         default:
             printf("packet code unknown: %d\n", buf[3]);
             return NULL;
