@@ -66,7 +66,7 @@ void* reader_work(void* x) {
     int bytes_read=0;
     int ret;
     Packet *packet;
-    packet = client_receive_packet(packet, fd);
+    packet = client_receive_packet(fd);
     printf("packet type: %x\n", packet->type);
 
     client_print_packet(packet);
