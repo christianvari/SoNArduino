@@ -40,10 +40,9 @@ void UART_init() {
 //ritorna 1 se ha settatto il packet, 0 altrimenti
 uint8_t arduino_receive_packet(CommandPacket* packet){
 
-
     if (!da_leggere) return 0;
 
-    if(calculate_checksum(data_received, 4) != data_received[5]){
+    if(calculate_checksum(data_received, 5) != data_received[5]){
         da_leggere = 0;
         return 0;
     }
