@@ -27,7 +27,7 @@ int main(){
     packet.type = ERROR;
     ErrorPacket errorPacket;
     errorPacket.packet=packet;
-    errorPacket.error_code = UnknownCommand;
+    errorPacket.error_code = CantHandleCommand;
 
     client_send_packet((Packet*)(&errorPacket), fd);
 
