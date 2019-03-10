@@ -252,6 +252,8 @@ void* reader_work(void* x) {
             
             arduino_speed = ((ConfigurationPacket*)packet)->velocity;
             arduino_accuracy = ((ConfigurationPacket*)packet)->precision;
+            configured = 1;
+            printf("Configured\n");
 
         }else if(packet->type == ERROR){
             printf("Error received: error code %d\n", ((ErrorPacket*)(packet))->error_code);
@@ -286,7 +288,7 @@ static void connect_handler(GtkWidget *widget, gpointer data){
     commandPacket.command = SEND_CONFIG;
     commandPacket.payload = 0;
 
-    /*
+    
     struct timespec str;
     str.tv_sec=0;
     str.tv_nsec=350000000;
@@ -297,7 +299,7 @@ static void connect_handler(GtkWidget *widget, gpointer data){
         nanosleep(&str, NULL);
 
     }
-    */
+    
     
     
     printf("Connected\n");
@@ -325,6 +327,35 @@ static void start_handler(GtkWidget *widget, gpointer data){
     struct timespec str;
     str.tv_sec=0;
     str.tv_nsec=350000000;
+
+    if(client_accuracy != arduino_accuracy || client_speed != arduino_speed){
+        configured=0;
+    }
+    while(!configured){
+        if(client_accuracy != arduino_accuracy){
+            Packet packet;
+            packet.type = COMMAND;
+            CommandPacket commandPacket;
+            commandPacket.packet = packet;
+            commandPacket.command = SET_PRECISION;
+            commandPacket.payload = client_accuracy;
+            client_send_packet((Packet*)(&commandPacket), fd);
+        }
+        if(client_speed != arduino_speed){
+            Packet packet;
+            packet.type = COMMAND;
+            CommandPacket commandPacket;
+            commandPacket.packet = packet;
+            commandPacket.command = SET_VELOCITY;
+            commandPacket.payload = client_speed;
+            client_send_packet((Packet*)(&commandPacket), fd);
+        }
+        if(client_accuracy == arduino_accuracy && client_speed == arduino_speed){
+            configured=1;
+        }
+    }
+    
+
     while(!started){
 
         client_send_packet((Packet*)(&commandPacket), fd);
@@ -519,6 +550,7 @@ int main(int argc, char *argv[])
     gtk_main();
 
 
-
+    List_reset(glob.head);
+    free(glob.head);
     return 0;
 }
