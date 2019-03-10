@@ -20,7 +20,7 @@ int write_buf(int fd, uint8_t* buf, int n){
             if (ret == -1) perror("Error writing");
             bytes_sent += ret;
         }
-        //if(i%4==0) sleep(1);
+        usleep(1000); //Arduino latency
     }
     for(i=0; i<n; i++){
         printf("%x ", buf[i]);
