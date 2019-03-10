@@ -43,41 +43,22 @@ int client_send_packet(Packet* packet, int fd){
         case COMMAND:
             n=sizeof(CommandPacket);
             for(i=0; i<n; i++){
-                buf[i+3] = *(((uint8_t*) packet)+i);
+                buf[i+2] = *(((uint8_t*) packet)+i);
             }
             break;
 
         // client never sends a status packet
-        
-
-        case STATUS:
-            n=sizeof(StatusPacket);
-            for(i=0; i<n; i++){
-                buf[i+3] = *(((uint8_t*) packet)+i);
-            }
-            break;
-        
-
         //should client send an error packet??
-        case ERROR:
-            n=sizeof(ErrorPacket);
-            for(i=0; i<n; i++){
-                buf[i+3] = *(((uint8_t*) packet)+i);
-                n++;
-            }
-            break;
-
         //client doesn't send Events and Configurations
         
         default:
             break;
     }
 
-    buf[2] = (uint8_t)n;
-    buf[n+3] = calculate_checksum(buf, n+3);  //header included
+    buf[n+2] = calculate_checksum(buf, n+2);  //header included
 
 
-    int ret = write_buf(fd, buf, n+4);
+    int ret = write_buf(fd, buf, n+3);
     return ret;
 }
 
