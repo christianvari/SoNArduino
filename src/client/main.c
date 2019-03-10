@@ -36,9 +36,13 @@ int MAX_RANGE = 400;
 int DEFAULT_START = 80;
 pthread_t reader;
 GtkWidget *start_button, *stop_button, *connect_button, *disconnect_button;
+GtkWidget *accuracy_scale, *accuracy_label;
+GtkWidget *speed_scale, *speed_label;
 int connected = 0;
 int started = 0;
 int configured = 0;
+int arduino_speed=1, arduino_accuracy=1;
+int client_speed=1, client_accuracy=1;
 
 
 /**================================================== *
@@ -216,6 +220,7 @@ void* reader_work(void* x) {
     int ret;
     Packet *packet;
     while(connected){
+
         packet = client_receive_packet(fd);
         //client_print_packet(packet);
         if(packet->type==STATUS){
@@ -244,7 +249,10 @@ void* reader_work(void* x) {
                     break;
             }
         }else if(packet->type == CONFIGURATION){
-            //Configura
+            
+            arduino_speed = ((ConfigurationPacket*)packet)->velocity;
+            arduino_accuracy = ((ConfigurationPacket*)packet)->precision;
+
         }else if(packet->type == ERROR){
             printf("Error received: error code %d\n", ((ErrorPacket*)(packet))->error_code);
         }
@@ -269,11 +277,39 @@ static void connect_handler(GtkWidget *widget, gpointer data){
     connected=1;
     ret = pthread_create(&reader, NULL, reader_work, NULL);
     if (ret != 0) { fprintf(stderr, "Error %d in pthread_create\n", ret); exit(EXIT_FAILURE); }
+    
+
+    Packet packet;
+    packet.type = COMMAND;
+    CommandPacket commandPacket;
+    commandPacket.packet = packet;
+    commandPacket.command = SEND_CONFIG;
+    commandPacket.payload = 0;
+
+    /*
+    struct timespec str;
+    str.tv_sec=0;
+    str.tv_nsec=350000000;
+    while(!configured){
+
+        client_send_packet((Packet*)(&commandPacket), fd);
+
+        nanosleep(&str, NULL);
+
+    }
+    */
+    
+    
     printf("Connected\n");
+
     gtk_widget_set_sensitive (connect_button, FALSE);
     gtk_widget_set_sensitive (disconnect_button, TRUE);
     gtk_widget_set_sensitive (start_button, TRUE);
     gtk_widget_set_sensitive (stop_button, FALSE);
+    gtk_widget_set_sensitive (accuracy_scale, TRUE);
+    gtk_range_set_value((GtkRange*)accuracy_scale, arduino_accuracy);
+    gtk_widget_set_sensitive (speed_scale, TRUE);
+    gtk_range_set_value((GtkRange*)speed_scale, arduino_speed);
 
 }
 
@@ -301,6 +337,8 @@ static void start_handler(GtkWidget *widget, gpointer data){
     gtk_widget_set_sensitive (disconnect_button, FALSE);
     gtk_widget_set_sensitive (start_button, FALSE);
     gtk_widget_set_sensitive (stop_button, TRUE);
+    gtk_widget_set_sensitive (accuracy_scale, FALSE);
+    gtk_widget_set_sensitive (speed_scale, FALSE);
 }
 
 static void stop_handler(GtkWidget *widget, gpointer data){
@@ -322,10 +360,14 @@ static void stop_handler(GtkWidget *widget, gpointer data){
 
     }
 
+    List_reset(glob.head);
+
     gtk_widget_set_sensitive (connect_button, FALSE);
     gtk_widget_set_sensitive (disconnect_button, TRUE);
     gtk_widget_set_sensitive (start_button, TRUE);
     gtk_widget_set_sensitive (stop_button, FALSE);
+    gtk_widget_set_sensitive (accuracy_scale, TRUE);
+    gtk_widget_set_sensitive (speed_scale, TRUE);
 }
 
 static void disconnect_handler(GtkWidget *widget, gpointer data){
@@ -356,8 +398,24 @@ static void disconnect_handler(GtkWidget *widget, gpointer data){
     gtk_widget_set_sensitive (disconnect_button, FALSE);
     gtk_widget_set_sensitive (start_button, FALSE);
     gtk_widget_set_sensitive (stop_button, FALSE);
+    gtk_widget_set_sensitive (accuracy_scale, FALSE);
+    gtk_widget_set_sensitive (speed_scale, FALSE);
     
     
+}
+
+static void accuracy_handler(GtkWidget *widget, gpointer data){
+
+    int pos = gtk_range_get_value((GtkRange*)accuracy_scale);
+    client_accuracy = pos;
+
+}
+
+static void speed_handler(GtkWidget *widget, gpointer data){
+
+    int pos = gtk_range_get_value((GtkRange*)speed_scale);
+    client_speed = pos;
+
 }
 
 static gboolean time_handler(GtkWidget *widget){
@@ -380,8 +438,6 @@ int main(int argc, char *argv[])
 {
     GtkWidget *window, *main_box, *left_box, *first_row, *second_row, *third_row, *fourth_row;
     
-    GtkWidget *speed_scale, *speed_label;
-    GtkWidget *accuracy_scale, *accuracy_label;
 
     glob.count = 0;
     glob.head=malloc(sizeof(ListHead));
@@ -424,12 +480,16 @@ int main(int argc, char *argv[])
 
     speed_scale = gtk_scale_new_with_range (GTK_ORIENTATION_HORIZONTAL, 1, 10, 1);
     speed_label = gtk_label_new ("Speed");
+    gtk_widget_set_sensitive (speed_scale, FALSE);
+    g_signal_connect (speed_scale, "value-changed", G_CALLBACK (speed_handler),  NULL);
     gtk_box_pack_start((GtkBox*)third_row, speed_scale, TRUE, TRUE, 30);
     gtk_box_pack_start((GtkBox*)third_row, speed_label, TRUE, TRUE, 30);
     gtk_box_pack_start((GtkBox*)left_box, third_row, TRUE, TRUE, 30);
 
     accuracy_scale = gtk_scale_new_with_range (GTK_ORIENTATION_HORIZONTAL, 1, 5, 1);
     accuracy_label = gtk_label_new ("Accuracy");
+    gtk_widget_set_sensitive (accuracy_scale, FALSE);
+    g_signal_connect (accuracy_scale, "value-changed", G_CALLBACK (accuracy_handler),  NULL);
     gtk_box_pack_start((GtkBox*)fourth_row, accuracy_scale, TRUE, TRUE, 30);
     gtk_box_pack_start((GtkBox*)fourth_row, accuracy_label, TRUE, TRUE, 30);
     gtk_box_pack_start((GtkBox*)left_box, fourth_row, TRUE, TRUE, 30);
@@ -457,6 +517,8 @@ int main(int argc, char *argv[])
     gtk_widget_show_all(window);
 
     gtk_main();
+
+
 
     return 0;
 }
