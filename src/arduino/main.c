@@ -85,20 +85,24 @@ int main(void){
                                 error_packet.error_code = SetOutOfRange;
                                 arduino_send_packet((Packet*) (&error_packet));
                             }
-                            else
+                            else{
                                 precision = data;
-                                event_packet.event = SETTED_PRECISION;
-                                arduino_send_packet((Packet*)(&event_packet));
+                                config_packet.velocity = velocity;
+                                config_packet.precision = precision;
+                                arduino_send_packet((Packet*)(&config_packet));
+                            }
                             break;
                         case SET_VELOCITY:
                             if(save(data, ADDR_VELOCITY)){
                                 error_packet.error_code = SetOutOfRange;
                                 arduino_send_packet((Packet*) (&error_packet));
                             }
-                            else
+                            else{
                                 velocity = data;
-                                event_packet.event = SETTED_VELOCITY;
-                                arduino_send_packet((Packet*)(&event_packet));
+                                config_packet.velocity = velocity;
+                                config_packet.precision = precision;
+                                arduino_send_packet((Packet*)(&config_packet));
+                            }
                             break;
                         case SEND_CONFIG:
                             config_packet.velocity = velocity;
