@@ -64,10 +64,7 @@ uint8_t readSonar(void){
 
     _delay_ms(SONAR_DELAY);
 
-    //max dist 64 cm
-    if(dist_in_cm>64) return SONAR_OUT_OF_RANGE;
-
-    return (dist_in_cm*4);
+    return (dist_in_cm);
 }
 
 uint8_t getDistance(uint8_t precision){

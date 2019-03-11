@@ -34,15 +34,19 @@ int fd;
 GtkWidget *darea;
 int MAX_RANGE = 400;
 int DEFAULT_START = 80;
+int DEFAULT_RANGE = 60;
 pthread_t reader;
 GtkWidget *start_button, *stop_button, *connect_button, *disconnect_button;
 GtkWidget *accuracy_scale, *accuracy_label;
 GtkWidget *speed_scale, *speed_label;
+GtkWidget *range_scale, *range_label;
 int connected = 0;
 int started = 0;
 int configured = 0;
 int arduino_speed=1, arduino_accuracy=1;
 int client_speed=1, client_accuracy=1;
+int range;
+char un_quarto[5] = "15", due_quarti[5]="30", tre_quarti[5]="45", quattro_quarti[5]="60";
 
 
 /**================================================== *
@@ -124,11 +128,22 @@ void draw_line(cairo_t *cr, uint8_t angle, uint8_t distance, double transparence
     cairo_set_source_rgba(cr, 1, 0, 0, transparence);
 
     //proportion distance:256=d:MAX_RANGE
-    int d = distance*MAX_RANGE/256;
-    cairo_move_to (cr, -d*cos(M_PI/180*angle), d*sin(M_PI/180*angle));
-    cairo_line_to (cr, -MAX_RANGE*cos(M_PI/180*angle), MAX_RANGE*sin(M_PI/180*angle));
-    cairo_stroke(cr);
 
+    // d:range=x:256
+    if(distance<=range){
+        int x = ((double)(distance*256))/range;
+    
+        int d = (double)x*MAX_RANGE/256;
+    
+        cairo_move_to (cr, -d*cos(M_PI/180*angle), d*sin(M_PI/180*angle));
+        cairo_line_to (cr, -MAX_RANGE*cos(M_PI/180*angle), MAX_RANGE*sin(M_PI/180*angle));
+        cairo_stroke(cr);
+    }
+    else{
+        cairo_move_to (cr, -MAX_RANGE*cos(M_PI/180*angle), MAX_RANGE*sin(M_PI/180*angle));
+        cairo_line_to (cr, -MAX_RANGE*cos(M_PI/180*angle), MAX_RANGE*sin(M_PI/180*angle));
+        cairo_stroke(cr);
+    }
 }
 
 void draw_all_status_in_list(cairo_t *cr, ListHead *head, double line_width){
@@ -187,6 +202,18 @@ void draw_radar_field(cairo_t *cr){
     cairo_stroke(cr);  
     cairo_arc(cr, 0, 0, MAX_RANGE/4, 0, M_PI);
     cairo_stroke(cr);   
+
+    cairo_rotate (cr, M_PI);
+    cairo_move_to (cr, (double)MAX_RANGE/4, 20);
+    cairo_show_text (cr, un_quarto);
+    cairo_move_to (cr, (double)MAX_RANGE/4*2, 20);
+    cairo_show_text (cr, due_quarti);
+    cairo_move_to (cr, (double)MAX_RANGE/4*3, 20);
+    cairo_show_text (cr, tre_quarti);
+    cairo_move_to (cr, (double)MAX_RANGE, 20);
+    cairo_show_text (cr, quattro_quarti);
+    cairo_rotate (cr, M_PI);
+
 }
 
 static void do_drawing(cairo_t *cr, GtkWidget *widget){
@@ -301,8 +328,6 @@ static void connect_handler(GtkWidget *widget, gpointer data){
 
     }
     
-    
-    
     printf("Connected\n");
 
     gtk_widget_set_sensitive (connect_button, FALSE);
@@ -313,6 +338,7 @@ static void connect_handler(GtkWidget *widget, gpointer data){
     gtk_range_set_value((GtkRange*)accuracy_scale, arduino_accuracy);
     gtk_widget_set_sensitive (speed_scale, TRUE);
     gtk_range_set_value((GtkRange*)speed_scale, arduino_speed);
+    gtk_widget_set_sensitive (range_scale, TRUE);
 
 }
 
@@ -371,6 +397,8 @@ static void start_handler(GtkWidget *widget, gpointer data){
     gtk_widget_set_sensitive (stop_button, TRUE);
     gtk_widget_set_sensitive (accuracy_scale, FALSE);
     gtk_widget_set_sensitive (speed_scale, FALSE);
+    gtk_widget_set_sensitive (range_scale, FALSE);
+
 }
 
 static void stop_handler(GtkWidget *widget, gpointer data){
@@ -400,6 +428,8 @@ static void stop_handler(GtkWidget *widget, gpointer data){
     gtk_widget_set_sensitive (stop_button, FALSE);
     gtk_widget_set_sensitive (accuracy_scale, TRUE);
     gtk_widget_set_sensitive (speed_scale, TRUE);
+    gtk_widget_set_sensitive (range_scale, TRUE);
+
 }
 
 static void disconnect_handler(GtkWidget *widget, gpointer data){
@@ -432,8 +462,8 @@ static void disconnect_handler(GtkWidget *widget, gpointer data){
     gtk_widget_set_sensitive (stop_button, FALSE);
     gtk_widget_set_sensitive (accuracy_scale, FALSE);
     gtk_widget_set_sensitive (speed_scale, FALSE);
-    
-    
+    gtk_widget_set_sensitive (range_scale, FALSE);
+  
 }
 
 static void accuracy_handler(GtkWidget *widget, gpointer data){
@@ -448,6 +478,22 @@ static void speed_handler(GtkWidget *widget, gpointer data){
     int pos = gtk_range_get_value((GtkRange*)speed_scale);
     client_speed = pos;
 
+}
+
+static void range_handler(GtkWidget *widget, gpointer data){
+
+    range = gtk_range_get_value((GtkRange*)range_scale);
+    //change range and labels
+
+    int uno = ((double)range/4)+0.5;
+    int due = ((double)range/4*2)+0.5;
+    int tre = ((double)range/4*3)+0.5;
+    int quattro = ((double)range)+0.5;
+
+    sprintf(un_quarto, "%d", uno);
+    sprintf(due_quarti, "%d", due);
+    sprintf(tre_quarti, "%d", tre);
+    sprintf(quattro_quarti, "%d", quattro);
 }
 
 static gboolean time_handler(GtkWidget *widget){
@@ -468,14 +514,14 @@ static gboolean on_draw_event(GtkWidget *widget, cairo_t *cr, gpointer user_data
 
 int main(int argc, char *argv[])
 {
-    GtkWidget *window, *main_box, *left_box, *first_row, *second_row, *third_row, *fourth_row;
+    GtkWidget *window, *main_box, *left_box, *first_row, *second_row, *third_row, *fourth_row, *fifth_row;
     
 
     glob.count = 0;
     glob.head=malloc(sizeof(ListHead));
     List_init(glob.head, 60);
     glob.line_width = 10;
-
+    range = DEFAULT_RANGE;
     
     gtk_init(&argc, &argv);
 
@@ -489,6 +535,8 @@ int main(int argc, char *argv[])
     second_row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     third_row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
     fourth_row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+    fifth_row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
+
 
     connect_button = gtk_button_new_with_label ("CONNECT");
     g_signal_connect (connect_button, "clicked", G_CALLBACK (connect_handler), NULL);
@@ -525,6 +573,15 @@ int main(int argc, char *argv[])
     gtk_box_pack_start((GtkBox*)fourth_row, accuracy_scale, TRUE, TRUE, 30);
     gtk_box_pack_start((GtkBox*)fourth_row, accuracy_label, TRUE, TRUE, 30);
     gtk_box_pack_start((GtkBox*)left_box, fourth_row, TRUE, TRUE, 30);
+
+    range_scale = gtk_scale_new_with_range (GTK_ORIENTATION_HORIZONTAL, 20, 256, 4);
+    range_label = gtk_label_new ("Range (cm)");
+    gtk_widget_set_sensitive (range_scale, FALSE);
+    gtk_range_set_value((GtkRange*)range_scale, DEFAULT_RANGE);
+    g_signal_connect (range_scale, "value-changed", G_CALLBACK (range_handler),  NULL);
+    gtk_box_pack_start((GtkBox*)fifth_row, range_scale, TRUE, TRUE, 30);
+    gtk_box_pack_start((GtkBox*)fifth_row, range_label, TRUE, TRUE, 30);
+    gtk_box_pack_start((GtkBox*)left_box, fifth_row, TRUE, TRUE, 30);
 
     gtk_box_pack_start((GtkBox*)main_box, darea, TRUE, TRUE, 0);
     gtk_box_pack_end((GtkBox*)main_box, left_box, TRUE, TRUE, 0);
