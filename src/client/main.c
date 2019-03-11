@@ -301,7 +301,7 @@ static void connect_handler(GtkWidget *widget, gpointer data){
     int ret = open_serial();
     if(ret){
         perror("Error in open_serial");
-        exit(EXIT_FAILURE);
+        return;
     }
     connected=1;
     ret = pthread_create(&reader, NULL, reader_work, NULL);
