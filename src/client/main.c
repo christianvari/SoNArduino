@@ -288,7 +288,8 @@ static void connect_handler(GtkWidget *widget, gpointer data){
     commandPacket.command = SEND_CONFIG;
     commandPacket.payload = 0;
 
-    
+    usleep(1000000);
+
     struct timespec str;
     str.tv_sec=0;
     str.tv_nsec=350000000;
