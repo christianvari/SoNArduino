@@ -68,19 +68,20 @@ uint8_t readSonar(void){
 }
 
 uint8_t getDistance(uint8_t precision){
-    uint8_t distance = 0;
+    uint32_t sum = 0;
     uint8_t tmp;
     uint8_t reads = 0;
+    uint8_t distance = 0;
     int i;
     for(i = 0; i< precision; i++){
         tmp = readSonar();
         if (tmp == SONAR_OUT_OF_RANGE)
             continue;
-        distance+= tmp;
+        sum+= tmp;
         reads++;
     }
     if(reads + MIN_READS > precision){
-        distance=(distance/reads) + 0.5;
+        distance = ((double) ((sum/reads) + 0.5));
         return distance;
     }
     return SONAR_OUT_OF_RANGE;

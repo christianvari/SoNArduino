@@ -62,13 +62,13 @@ uint8_t modifyAngle(uint8_t type, uint8_t delta){
 	{
 		case 0:
 			if(angle - delta < 0)
-				return -1;
+				setAngle(0);
 			setAngle(angle-delta);
 			break;
 	
 		case 1:
 			if(angle + delta > 180)
-				return -1;
+				setAngle(180);
 			setAngle(angle+delta);
 			break;
 	

@@ -3,3 +3,5 @@
 *.elf
 /.vscode
 src/client/tests/gtk_test
+src/client/tests/client
+src/client/main
