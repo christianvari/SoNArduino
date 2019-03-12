@@ -1,4 +1,3 @@
-# set this to false to disable sonars in firmware
 CC=avr-gcc
 AS=avr-gcc
 INCLUDE_DIRS=-I. -I../avr_common
