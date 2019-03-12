@@ -478,6 +478,9 @@ static void speed_handler(GtkWidget *widget, gpointer data){
     int pos = gtk_range_get_value((GtkRange*)speed_scale);
     client_speed = pos;
 
+    int len= (60 -4(client_speed-1));
+    List_set_max_length( glob.head,len);
+
 }
 
 static void range_handler(GtkWidget *widget, gpointer data){
