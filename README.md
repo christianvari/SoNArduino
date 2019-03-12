@@ -1,11 +1,11 @@
 # Progetto Sistemi Operativi
-## SO'N ARDUINO
+## SO' N ARduino
 
 
 ### Introduzione
 
-Il progetto SO'N ARDUINO riguarda l'acquisizione di dati da un sensore ad ultrasuoni, il quale ruotando su se stesso con l'ausilio di un servomotore riesce a scansionare lo spazio intorno a se per un angolo di 180°.
-I dati raccolti vengono trasmessi dall'arduino al pc mediante una connessione seriale. Dal pc è possibile impartire comandi al sonar tramite un'interfaccia grafica GTK che serve anche a graficare i dati ricevuti dal sonar, attraverso la quale è anche possibile configurare 3 paramentri:<br/> 
+Il progetto SO' N ARduino riguarda l'acquisizione di dati da un sensore ad ultrasuoni, il quale ruotando su se stesso con l'ausilio di un servomotore riesce a scansionare lo spazio intorno a se per un angolo di 180°.
+I dati raccolti vengono trasmessi dall'arduino al pc mediante una connessione seriale. Dal pc è possibile visualizzare graficamente i dati ricevuti dal sonar ed impartire comandi al sonar tramite un'interfaccia grafica GTK, configurando i 3 paramentri principali:<br/> 
 <ul>
 <li>velocità: valore da 1 a 10 - indica l'angolo di avanzamento che deve descrivere il servomotore ad ogni step;</li>
 <li>accuratezza: valore tra 1 e 5 - accuratezza n significa che il risultato illustrato sarà la media tra n misurazioni consecutive;</li>
@@ -115,6 +115,13 @@ Ogni 100 millisecondi scade un timeout che refresha la drawing area e permette d
 Le misurazioni sono salvate all'interno di una linked list di lunghezza massima costante gestita in modo FIFO, in modo da poter dimenticare in automatico le misurazioni più vecchie e mantenere le più recenti.<br/>
 La linked list viene passata come parametro alla funzione che si occupa di graficare le misurazioni, la quale disegnerà un segmento più o meno lungo per ogni misurazione nella lista.
 
+Alla pressione del tasto Connect, oltre all'apertura del collegamento seriale, vengono richieste e scaricate le configurazioni salvate sulla EEPROM dell'Arduino e gli slider si posizionano sui valori giusti.
+
+Alla pressione di Start e Stop vengono inviati all'Arduino i rispettivi comandi.<br>
+Inoltre se gli slider sono stati cambiati ed indicano valori diversi da quelli salvati sull'Arduino, alla pressione di Start vengono salvati gli attuali valori di speed e accuracy.
+
+Alla pressione di Disconnect viene fatto join sul thread reader occupato a leggere dalla seriale, e viene chiuso il file descriptor associato alla seriale.
+
 <img src="gui_example.png">
 
 # How-to-Run
@@ -137,7 +144,7 @@ Per compilare il programma:
 ##### Client
 
 > $ cd src/client<br>
-> $ make
+> $ gcc main.c gui/linked_list.c client_packet/client_packet.c ../packet/packet.c -o main \`pkg-config --cflags --libs cairo gtk+-3.0\` -lm
 
 #### Esecuzione
 Per eseguire:
