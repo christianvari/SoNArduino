@@ -7,9 +7,9 @@
 Il progetto SO'N ARDUINO riguarda l'acquisizione di dati da un sensore ad ultrasuoni, il quale ruotando su se stesso con l'ausilio di un servomotore riesce a scansionare lo spazio intorno a se per un angolo di 180°.
 I dati raccolti vengono trasmessi dall'arduino al pc mediante una connessione seriale. Dal pc è possibile impartire comandi al sonar tramite un'interfaccia grafica GTK che serve anche a graficare i dati ricevuti dal sonar, attraverso la quale è anche possibile configurare 3 paramentri:<br/> 
 <ul>
-<li>velocità: valore da 1 a 10 - indica l'angolo di avanzamento che deve descrivere il servomotore ad ogni step,</li>
-<li>accuratezza: valore tra 1 e 5 - accuratezza n significa che il risultato illustrato sarà la media tra n misurazioni consecutive,</li>
-<li>range di visualizzazione: da 20cm a 2,56m - può aver senso limitare l'utilizzo del sonar ed interessarsi a visualizzare ostacoli solo entro uno certo range</li>
+<li>velocità: valore da 1 a 10 - indica l'angolo di avanzamento che deve descrivere il servomotore ad ogni step;</li>
+<li>accuratezza: valore tra 1 e 5 - accuratezza n significa che il risultato illustrato sarà la media tra n misurazioni consecutive;</li>
+<li>range di visualizzazione: da 20cm a 2,56m - può aver senso limitare l'utilizzo del sonar ed interessarsi a visualizzare ostacoli solo entro uno certo range.</li>
 </ul>
 Una volta avviata una scansione, le configurazioni scelte di velocità e accuratezza verranno salvate in automatico sulla EEPROM dell'Arduino in modo da averle al prossimo avvio (il range viene gestito lato client).
 
@@ -35,7 +35,7 @@ Il  sensore a ultrasuoni HC-SR04 può essere attivato mediante un segnale digita
 >distanza = (tempo_pin_echo / 2) * velocita_suono
 
 Per calcolare il tempo per il quale il pin ECHO è a +5V si utilizza un timer a 16 bit sfruttando gli interrupt di overflow del timer. In questo modo si può calcolare il tempo come:<br/>
->tempo_pin_echo = num_overflow * 655305 + TCNTn
+>tempo_pin_echo = num_overflow * 65535 + TCNTn
 
 ### EEPROM
 
@@ -119,17 +119,26 @@ La linked list viene passata come parametro alla funzione che si occupa di grafi
 
 # How-to-Run
 
+#### Collegamenti PIN
+<ul>
+<li>Sonar TRIG - PIN SCL 21</li>
+<li>Sonar ECHO - PIN 2</li>
+<li>Servo PWM - PIN 12</li>
+</ul>
+
+#### Compilazione 
 Per compilare il programma:
 
-#### Arduino
+##### Arduino
 
 > $ cd src/arduino<br>
 > $ make main.hex
 
-#### Client
+##### Client
 
 > $ cd src/client<br>
 > $ make
 
+#### Esecuzione
 Per eseguire:
 > .../src/client$ ./main
