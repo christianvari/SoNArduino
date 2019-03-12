@@ -598,7 +598,7 @@ int main(int argc, char *argv[])
 
     gtk_window_set_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
     gtk_window_set_default_size(GTK_WINDOW(window), 1400, 600); 
-    gtk_window_set_title(GTK_WINDOW(window), "SO'N ARduino");
+    gtk_window_set_title(GTK_WINDOW(window), "SO' N ARduino");
 
     //refresh 10 times per sec (100millisec)
     g_timeout_add(100, (GSourceFunc) time_handler, (gpointer) window);
