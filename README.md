@@ -138,14 +138,20 @@ Per compilare il programma:
 
 ##### Arduino
 
-> $ cd src/arduino<br>
-> $ make main.hex
+```bash
+$ cd src/arduino
+../src/arduino$ make main.hex
+```
 
 ##### Client
 
-> $ cd src/client<br>
-> $ gcc main.c gui/linked_list.c client_packet/client_packet.c ../packet/packet.c -o main \`pkg-config --cflags --libs cairo gtk+-3.0\` -lm
+```bash
+$ cd src/client
+../src/client$ gcc main.c gui/linked_list.c client_packet/client_packet.c ../packet/packet.c -o main `pkg-config --cflags --libs cairo gtk+-3.0` -lm
+```
 
 #### Esecuzione
 Per eseguire:
-> .../src/client$ ./main
+```bash
+$ .../src/client$ ./main
+```
